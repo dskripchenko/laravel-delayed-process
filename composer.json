@@ -1,0 +1,38 @@
+{
+    "name": "dskripchenko/laravel-delayed-process",
+    "description": "Delayed Process For Laravel.",
+    "license": "MIT",
+    "homepage": "https://github.com/dskripchenko/laravel-delayed-process",
+    "keywords": [
+        "laravel",
+        "long time processes"
+    ],
+    "authors": [
+        {
+            "name": "Denis Skripchenko",
+            "email": "denskrp90@gmail.com"
+        }
+    ],
+    "require": {
+        "ext-json": "*",
+        "laravel/framework": "6.*|7.*|8.*|9.*",
+        "dskripchenko/php-array-helper": "^1.1"
+    },
+    "require-dev": {
+        "roave/security-advisories": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "Dskripchenko\\DelayedProcess\\": [
+                "src/"
+            ]
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Dskripchenko\\DelayedProcess\\Providers\\DelayedProcessServiceProvider"
+            ]
+        }
+    }
+}
