@@ -21,7 +21,7 @@ class DelayedProcessServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->loadMigrationsFrom(dirname(__DIR__, 2), '/databases/migrations');
+        $this->loadMigrationsFrom(dirname(__DIR__, 2) . '/databases/migrations');
 
         if ($this->app->runningInConsole()) {
             $this->commands($this->commands);
