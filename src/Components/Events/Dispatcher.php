@@ -43,7 +43,10 @@ class Dispatcher extends \Illuminate\Events\Dispatcher
             } else {
                 $listenerId = uniqid("listener_id_", true);
                 $listenerIds[] = $listenerId;
-                $this->listeners[$event][$listenerId] = $this->makeListener($listener);
+                if (!method_exists($this, 'prepareListeners')) {
+                    $listener = $this->makeListener($listener);
+                }
+                $this->listeners[$event][$listenerId] = $listener;
             }
         }
 
