@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs\DelayedProcess;
+namespace Dskripchenko\DelayedProcess\Jobs;
 
 use Dskripchenko\DelayedProcess\Components\Events\Dispatcher;
 use Dskripchenko\DelayedProcess\Models\DelayedProcess;

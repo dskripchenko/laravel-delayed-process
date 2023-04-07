@@ -2,7 +2,7 @@
 
 namespace Dskripchenko\DelayedProcess\Models;
 
-use App\Jobs\DelayedProcess\DelayedProcessJob;
+use Dskripchenko\DelayedProcess\Jobs\DelayedProcessJob;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
