@@ -15,7 +15,7 @@
     ],
     "require": {
         "ext-json": "*",
-        "laravel/framework": "6.*|7.*|8.*|9.*|10.*",
+        "laravel/framework": "6.*|7.*|8.*|9.*|10.*|11.*",
         "dskripchenko/php-array-helper": "^1.1"
     },
     "require-dev": {
