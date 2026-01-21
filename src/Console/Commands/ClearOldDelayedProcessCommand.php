@@ -4,7 +4,6 @@ namespace Dskripchenko\DelayedProcess\Console\Commands;
 
 use Dskripchenko\DelayedProcess\Models\DelayedProcess;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
 class ClearOldDelayedProcessCommand extends Command
 {
@@ -25,16 +24,9 @@ class ClearOldDelayedProcessCommand extends Command
 
     public function handle(): void
     {
-        $sql = <<<RAW_SQL
-DELETE FROM delayed_processes
-WHERE status NOT IN (:status_new, :status_wait)
-    AND DATE(created_at) <= DATE(DATE_SUB(NOW(), INTERVAL :days DAY))
-RAW_SQL;
-
-        DB::statement($sql, [
-            ':status_new' => DelayedProcess::STATUS_NEW,
-            ':status_wait' => DelayedProcess::STATUS_WAIT,
-            ':days' => $this->days
-        ]);
+        DelayedProcess::query()
+            ->whereNotIn('status', [DelayedProcess::STATUS_NEW, DelayedProcess::STATUS_WAIT])
+            ->whereDate('created_at', '<=', now()->subDays($this->days))
+            ->delete();
     }
 }
