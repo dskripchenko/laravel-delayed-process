@@ -1,34 +1,32 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Dskripchenko\DelayedProcess\Components\Events;
 
 use Closure;
 use Illuminate\Events\QueuedClosure;
 use Illuminate\Support\Str;
-use ReflectionException;
 
-class Dispatcher extends \Illuminate\Events\Dispatcher
+final class Dispatcher extends \Illuminate\Events\Dispatcher
 {
     /**
-     * @param $events
-     * @param $listener
-     * @return array
-     * @throws ReflectionException
+     * @param  string|Closure|QueuedClosure  $events
+     * @param  mixed  $listener
+     * @return string[]
      */
     public function listen($events, $listener = null): array
     {
         if ($events instanceof Closure) {
             return collect($this->firstClosureParameterTypes($events))
-                ->each(function ($event) use ($events) {
-                    return $this->listen($event, $events);
-                })->flatten()->toArray();
+                ->flatMap(fn (string $event): array => $this->listen($event, $events))
+                ->all();
         }
 
         if ($events instanceof QueuedClosure) {
             return collect($this->firstClosureParameterTypes($events->closure))
-                ->each(function ($event) use ($events) {
-                    return $this->listen($event, $events->resolve());
-                })->flatten()->toArray();
+                ->flatMap(fn (string $event): array => $this->listen($event, $events->resolve()))
+                ->all();
         }
 
         if ($listener instanceof QueuedClosure) {
@@ -38,14 +36,16 @@ class Dispatcher extends \Illuminate\Events\Dispatcher
         $listenerIds = [];
 
         foreach ((array) $events as $event) {
-            if (Str::contains($event, '*')) {
+            if (str_contains($event, '*')) {
                 $this->setupWildcardListen($event, $listener);
             } else {
-                $listenerId = uniqid("listener_id_", true);
+                $listenerId = Str::uuid7()->toString();
                 $listenerIds[] = $listenerId;
-                if (!method_exists($this, 'prepareListeners')) {
+
+                if (! method_exists($this, 'prepareListeners')) {
                     $listener = $this->makeListener($listener);
                 }
+
                 $this->listeners[$event][$listenerId] = $listener;
             }
         }
@@ -54,16 +54,12 @@ class Dispatcher extends \Illuminate\Events\Dispatcher
     }
 
     /**
-     * @param string $event
-     * @param array $ids
-     * @return void
+     * @param  string[]  $ids
      */
     public function unlisten(string $event, array $ids = []): void
     {
         foreach ($ids as $id) {
-            if (isset($this->listeners[$event][$id])) {
-                unset($this->listeners[$event][$id]);
-            }
+            unset($this->listeners[$event][$id]);
         }
     }
 }
