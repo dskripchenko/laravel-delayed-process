@@ -1,6 +1,6 @@
 # 前端拦截器集成指南
 
-**语言:** [English](frontend-interceptors-guide.md) | [Русский](frontend-interceptors-guide.ru.md) | [Deutsch](frontend-interceptors-guide.de.md) | 中文 | 返回 [README](README.zh.md)
+**语言:** [English](../en/frontend-interceptors-guide.md) | [Русский](../ru/frontend-interceptors-guide.md) | [Deutsch](../de/frontend-interceptors-guide.md) | 中文 | 返回 [README](README.md)
 
 详细指南，用于将 `laravel-delayed-process` 前端拦截器集成到 **Vue.js 3** 和 **React** 应用程序中。
 

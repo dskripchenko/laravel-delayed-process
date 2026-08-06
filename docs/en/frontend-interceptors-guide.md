@@ -1,6 +1,6 @@
 # Frontend Interceptors Integration Guide
 
-**Language:** [English](frontend-interceptors-guide.md) | [Русский](frontend-interceptors-guide.ru.md) | [Deutsch](frontend-interceptors-guide.de.md) | [中文](frontend-interceptors-guide.zh.md) | Back to [README](../README.md)
+**Language:** [English](frontend-interceptors-guide.md) | [Русский](../ru/frontend-interceptors-guide.md) | [Deutsch](../de/frontend-interceptors-guide.md) | [中文](../zh/frontend-interceptors-guide.md) | Back to [README](../../README.md)
 
 Detailed guide for integrating `laravel-delayed-process` frontend interceptors into **Vue.js 3** and **React** applications.
 

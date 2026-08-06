@@ -1,11 +1,11 @@
 # Laravel 延时处理
 
 [![Packagist Version](https://img.shields.io/packagist/v/dskripchenko/laravel-delayed-process)](https://packagist.org/packages/dskripchenko/laravel-delayed-process)
-[![License](https://img.shields.io/packagist/l/dskripchenko/laravel-delayed-process)](../LICENSE.md)
-[![PHP Version](https://img.shields.io/packagist/dependency-v/dskripchenko/laravel-delayed-process/php)](../composer.json)
-[![Laravel Version](https://img.shields.io/packagist/dependency-v/dskripchenko/laravel-delayed-process/laravel/framework)](../composer.json)
+[![License](https://img.shields.io/packagist/l/dskripchenko/laravel-delayed-process)](../../LICENSE.md)
+[![PHP Version](https://img.shields.io/packagist/dependency-v/dskripchenko/laravel-delayed-process/php)](../../composer.json)
+[![Laravel Version](https://img.shields.io/packagist/dependency-v/dskripchenko/laravel-delayed-process/laravel/framework)](../../composer.json)
 
-**语言:** [English](../README.md) | [Русский](README.ru.md) | [Deutsch](README.de.md) | [中文](README.zh.md)
+**语言:** [English](../../README.md) | [Русский](../ru/README.md) | [Deutsch](../de/README.md) | [中文](README.md)
 
 在 Laravel 中异步执行长时间运行的操作，支持基于 UUID 的跟踪、自动重试、安全白名单以及适用于 Axios、Fetch 和 XHR 的透明前端拦截器。
 
@@ -763,15 +763,15 @@ try {
 
 ## 实用手册
 
-如需使用方法、模式和故障排除，请参阅 **[实用手册](cookbook.zh.md)**。
+如需使用方法、模式和故障排除，请参阅 **[实用手册](cookbook.md)**。
 
-可用语言：[English](cookbook.md) | [Русский](cookbook.ru.md) | [Deutsch](cookbook.de.md) | [中文](cookbook.zh.md)
+可用语言：[English](../en/cookbook.md) | [Русский](../ru/cookbook.md) | [Deutsch](../de/cookbook.md) | [中文](cookbook.md)
 
 ---
 
 ## 前端集成指南
 
-有关将拦截器集成到 **Vue.js 3** 和 **React** 应用程序中的详细分步指南，请参阅 **[前端拦截器指南](frontend-interceptors-guide.zh.md)**。
+有关将拦截器集成到 **Vue.js 3** 和 **React** 应用程序中的详细分步指南，请参阅 **[前端拦截器指南](frontend-interceptors-guide.md)**。
 
 包括：composables/hooks、进度跟踪、批量轮询、错误处理、SSR 支持和测试。
 
@@ -779,4 +779,4 @@ try {
 
 ## 许可证
 
-[MIT](../LICENSE.md) &copy; Denis Skripchenko
+[MIT](../../LICENSE.md) &copy; Denis Skripchenko

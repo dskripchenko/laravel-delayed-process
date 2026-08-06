@@ -1,60 +1,60 @@
-# Laravel Delayed Process — Книга рецептов
+# Laravel Delayed Process — Cookbook
 
-**Язык:** [English](cookbook.md) | [Русский](cookbook.ru.md) | [Deutsch](cookbook.de.md) | [中文](cookbook.zh.md)
+**Language:** [English](cookbook.md) | [Русский](../ru/cookbook.md) | [Deutsch](../de/cookbook.md) | [中文](../zh/cookbook.md)
 
-Вернуться к [README](README.ru.md)
+Back to [README](../../README.md)
 
-Практические рецепты, паттерны интеграции и устранение неполадок для `dskripchenko/laravel-delayed-process`.
-
----
-
-## Оглавление
-
-### Часть 1: Рецепты Backend
-- [Рецепт 1: Простая асинхронная генерация отчётов](#рецепт-1-простая-асинхронная-генерация-отчётов)
-- [Рецепт 2: Экспорт CSV/Excel файлов](#рецепт-2-экспорт-csvexcel-файлов)
-- [Рецепт 3: Массовая отправка писем](#рецепт-3-массовая-отправка-писем)
-- [Рецепт 4: Конвейер обработки изображений/видео](#рецепт-4-конвейер-обработки-изображенийвидео)
-- [Рецепт 5: Интеграция со сторонним API](#рецепт-5-интеграция-со-сторонним-api)
-
-### Часть 2: Интеграция Frontend
-- [Рецепт 6: Полная настройка Axios (production-ready)](#рецепт-6-полная-настройка-axios-production-ready)
-- [Рецепт 7: Использование Native Fetch API](#рецепт-7-использование-native-fetch-api)
-- [Рецепт 8: Vue.js 3 Composable](#рецепт-8-vuejs-3-composable)
-- [Рецепт 9: Индикатор прогресса с onPoll](#рецепт-9-индикатор-прогресса-с-onpoll)
-- [Рецепт 10: Глобальная обработка ошибок](#рецепт-10-глобальная-обработка-ошибок)
-- [Рецепт 11: Несколько конфигураций для разных endpoint'ов](#рецепт-11-несколько-конфигураций-для-разных-endpoint-ов)
-
-### Часть 3: Продвинутые паттерны
-- [Рецепт 12: Условная отложенная обработка](#рецепт-12-условная-отложенная-обработка)
-- [Рецепт 13: Цепочка отложенных процессов](#рецепт-13-цепочка-отложенных-процессов)
-- [Рецепт 14: Кастомные стратегии повторных попыток (Frontend)](#рецепт-14-кастомные-стратегии-повторных-попыток-frontend)
-- [Рецепт 15: Тестирование с Pest PHP](#рецепт-15-тестирование-с-pest-php)
-
-### Часть 4: Операции и мониторинг
-- [Рецепт 16: Настройка Supervisor / Horizon](#рецепт-16-настройка-supervisor--horizon)
-- [Рецепт 17: Плановая очистка](#рецепт-17-плановая-очистка)
-- [Рецепт 18: Мониторинг зависших процессов](#рецепт-18-мониторинг-зависших-процессов)
-- [Рецепт 19: Обслуживание базы данных](#рецепт-19-обслуживание-базы-данных)
-
-### Часть 5: Устранение неполадок
-- [Процесс зависает в статусе "wait" навечно](#проблема-процесс-зависает-в-статусе-wait-навечно)
-- [Ошибка "Entity Not Allowed"](#проблема-ошибка-entity-not-allowed)
-- [Ошибка CSRF Token Mismatch в SPA](#проблема-ошибка-csrf-token-mismatch-в-spa)
-- [Время опроса истекло](#проблема-время-опроса-истекло)
-- [Race условия при высокой конкурентности](#проблема-race-условия-при-высокой-конкурентности)
-- [Утечки памяти при длительном polling](#проблема-утечки-памяти-при-длительном-polling)
-- [Устаревшая миграция не удаётся](#проблема-устаревшая-миграция-не-удаётся)
+Practical recipes, integration patterns, and troubleshooting for `dskripchenko/laravel-delayed-process`.
 
 ---
 
-## Часть 1: Рецепты Backend
+## Table of Contents
 
-### Рецепт 1: Простая асинхронная генерация отчётов
+### Part 1: Backend Recipes
+- [Recipe 1: Simple Async Report Generation](#recipe-1-simple-async-report-generation)
+- [Recipe 2: CSV/Excel File Export](#recipe-2-csvexcel-file-export)
+- [Recipe 3: Bulk Email Sending](#recipe-3-bulk-email-sending)
+- [Recipe 4: Image/Video Processing Pipeline](#recipe-4-imagevideo-processing-pipeline)
+- [Recipe 5: Third-Party API Integration](#recipe-5-third-party-api-integration)
 
-Отчёт о продажах, который генерируется более 30 секунд.
+### Part 2: Frontend Integration
+- [Recipe 6: Full Axios Setup (Production-Ready)](#recipe-6-full-axios-setup-production-ready)
+- [Recipe 7: Using with Native Fetch API](#recipe-7-using-with-native-fetch-api)
+- [Recipe 8: Vue.js 3 Composable](#recipe-8-vuejs-3-composable)
+- [Recipe 9: Progress Indicator with onPoll](#recipe-9-progress-indicator-with-onpoll)
+- [Recipe 10: Global Error Handling](#recipe-10-global-error-handling)
+- [Recipe 11: Multiple Configs for Different Endpoints](#recipe-11-multiple-configs-for-different-endpoints)
 
-**Обработчик:**
+### Part 3: Advanced Patterns
+- [Recipe 12: Conditional Delayed Processing](#recipe-12-conditional-delayed-processing)
+- [Recipe 13: Chaining Delayed Processes](#recipe-13-chaining-delayed-processes)
+- [Recipe 14: Custom Retry Strategies (Frontend)](#recipe-14-custom-retry-strategies-frontend)
+- [Recipe 15: Testing with Pest PHP](#recipe-15-testing-with-pest-php)
+
+### Part 4: Operations & Monitoring
+- [Recipe 16: Supervisor / Horizon Setup](#recipe-16-supervisor--horizon-setup)
+- [Recipe 17: Scheduled Cleanup](#recipe-17-scheduled-cleanup)
+- [Recipe 18: Stuck Process Monitoring](#recipe-18-stuck-process-monitoring)
+- [Recipe 19: Database Maintenance](#recipe-19-database-maintenance)
+
+### Part 5: Troubleshooting
+- [Process Stuck in "wait" Forever](#problem-process-stuck-in-wait-forever)
+- ["Entity Not Allowed" Error](#problem-entity-not-allowed-error)
+- [CSRF Token Mismatch in SPA](#problem-csrf-token-mismatch-in-spa)
+- [Polling Timeout Exceeded](#problem-polling-timeout-exceeded)
+- [Race Conditions in High-Concurrency](#problem-race-conditions-in-high-concurrency)
+- [Memory Leaks with Long-Running Polling](#problem-memory-leaks-with-long-running-polling)
+- [Legacy Migration Fails](#problem-legacy-migration-fails)
+
+---
+
+## Part 1: Backend Recipes
+
+### Recipe 1: Simple Async Report Generation
+
+A sales report that takes 30+ seconds to generate.
+
+**Handler:**
 
 ```php
 <?php
@@ -94,7 +94,7 @@ final class SalesReportService
 }
 ```
 
-**Конфиг:**
+**Config:**
 
 ```php
 // config/delayed-process.php
@@ -103,7 +103,7 @@ final class SalesReportService
 ],
 ```
 
-**Контроллер:**
+**Controller:**
 
 ```php
 <?php
@@ -142,9 +142,9 @@ final class ReportController extends ApiController
 
 ---
 
-### Рецепт 2: Экспорт CSV/Excel файлов
+### Recipe 2: CSV/Excel File Export
 
-Экспорт больших наборов данных в файл и возврат URL для скачивания.
+Export large datasets to a file and return a download URL.
 
 ```php
 <?php
@@ -189,7 +189,7 @@ final class UserExportService
 }
 ```
 
-**Использование:**
+**Usage:**
 
 ```php
 $process = $factory->make(
@@ -201,9 +201,9 @@ $process = $factory->make(
 
 ---
 
-### Рецепт 3: Массовая отправка писем
+### Recipe 3: Bulk Email Sending
 
-Отправка персонализированных писем большой группе получателей.
+Send personalized emails to a large group of recipients.
 
 ```php
 <?php
@@ -247,9 +247,9 @@ final class BulkEmailService
 
 ---
 
-### Рецепт 4: Конвейер обработки изображений/видео
+### Recipe 4: Image/Video Processing Pipeline
 
-Обработка загруженного медиа — изменение размера, конвертация, генерация миниатюр.
+Process uploaded media — resize, convert, generate thumbnails.
 
 ```php
 <?php
@@ -300,7 +300,7 @@ final class MediaProcessingService
 }
 ```
 
-**Использование:**
+**Usage:**
 
 ```php
 $process = $factory->make(
@@ -317,9 +317,9 @@ $process = $factory->make(
 
 ---
 
-### Рецепт 5: Интеграция со сторонним API
+### Recipe 5: Third-Party API Integration
 
-Вызов медленного внешнего API (платёжный шлюз, поставщик доставки, и т.д.).
+Call a slow external API (payment gateway, shipping provider, etc.).
 
 ```php
 <?php
@@ -362,11 +362,11 @@ final class ShippingRateService
 
 ---
 
-## Часть 2: Интеграция Frontend
+## Part 2: Frontend Integration
 
-### Рецепт 6: Полная настройка Axios (production-ready)
+### Recipe 6: Full Axios Setup (Production-Ready)
 
-Полная production-ready настройка Axios с обработкой ошибок.
+A complete production-ready Axios setup with error handling.
 
 ```typescript
 // src/shared/api/http-client.ts
@@ -413,7 +413,7 @@ function createHttpClient(): AxiosInstance {
 export const httpClient = createHttpClient();
 ```
 
-**Использование в сервисе:**
+**Usage in a service:**
 
 ```typescript
 // src/entities/report/api/report-api.ts
@@ -439,7 +439,7 @@ export async function generateSalesReport(
 
 ---
 
-### Рецепт 7: Использование Native Fetch API
+### Recipe 7: Using with Native Fetch API
 
 ```typescript
 import { patchFetch } from '@/delayed-process';
@@ -474,9 +474,9 @@ async function fetchReport(): Promise<void> {
 
 ---
 
-### Рецепт 8: Vue.js 3 Composable
+### Recipe 8: Vue.js 3 Composable
 
-Переиспользуемый composable для операций отложенного процесса.
+A reusable composable for delayed process operations.
 
 ```typescript
 // src/shared/composables/useDelayedProcess.ts
@@ -536,7 +536,7 @@ export function useDelayedProcess<T>(
 }
 ```
 
-**Использование в компоненте:**
+**Usage in a component:**
 
 ```vue
 <script setup lang="ts">
@@ -579,9 +579,9 @@ async function onGenerate(): Promise<void> {
 
 ---
 
-### Рецепт 9: Индикатор прогресса с onPoll
+### Recipe 9: Progress Indicator with onPoll
 
-Показывать прогресс опроса пользователю.
+Show polling progress to the user.
 
 ```typescript
 import { ref } from 'vue';
@@ -618,9 +618,9 @@ applyAxiosInterceptor(api, {
 
 ---
 
-### Рецепт 10: Глобальная обработка ошибок
+### Recipe 10: Global Error Handling
 
-Централизованная обработка ошибок для сбоев отложенных процессов.
+Centralized error handling for delayed process failures.
 
 ```typescript
 // src/shared/api/error-handler.ts
@@ -652,7 +652,7 @@ export function normalizeError(error: unknown): AppError {
 }
 ```
 
-**Использование с глобальным хранилищем уведомлений:**
+**Usage with a global error notification store:**
 
 ```typescript
 // src/shared/stores/notification-store.ts
@@ -688,9 +688,9 @@ export const useNotificationStore = defineStore('notifications', () => {
 
 ---
 
-### Рецепт 11: Несколько конфигураций для разных endpoint'ов
+### Recipe 11: Multiple Configs for Different Endpoints
 
-Использование разных конфигураций опроса для разных групп API.
+Use different polling configurations for different API groups.
 
 ```typescript
 import axios from 'axios';
@@ -717,11 +717,11 @@ applyAxiosInterceptor(heavyApi, {
 
 ---
 
-## Часть 3: Продвинутые паттерны
+## Part 3: Advanced Patterns
 
-### Рецепт 12: Условная отложенная обработка
+### Recipe 12: Conditional Delayed Processing
 
-Отложить обработку только в том случае, если операция ожидается тяжёлой.
+Defer only if the operation is expected to be heavy.
 
 ```php
 <?php
@@ -778,9 +778,9 @@ final class ReportController extends ApiController
 
 ---
 
-### Рецепт 13: Цепочка отложенных процессов
+### Recipe 13: Chaining Delayed Processes
 
-Процесс A генерирует данные, процесс B их использует. Обработчик A запускает B.
+Process A generates data, process B uses it. The handler for A triggers B.
 
 ```php
 <?php
@@ -835,13 +835,13 @@ final class DataPipelineService
 }
 ```
 
-> **Примечание:** Не забудьте добавить класс в `allowed_entities` один раз — он обрабатывает оба метода.
+> **Note:** Remember to add the class to `allowed_entities` once — it handles both methods.
 
 ---
 
-### Рецепт 14: Кастомные стратегии повторных попыток (Frontend)
+### Recipe 14: Custom Retry Strategies (Frontend)
 
-Реализовать экспоненциальный backoff на стороне frontend polling.
+Implement exponential backoff on the frontend polling side.
 
 ```typescript
 import { pollUntilDone, resolveConfig, type DelayedProcessConfig } from '@/delayed-process';
@@ -879,9 +879,9 @@ async function pollWithExponentialBackoff(
 
 ---
 
-### Рецепт 15: Тестирование с Pest PHP
+### Recipe 15: Testing with Pest PHP
 
-Тестирование создания и выполнения отложенного процесса.
+Test delayed process creation and execution.
 
 ```php
 <?php
@@ -981,11 +981,11 @@ it('returns correct resource format', function (): void {
 
 ---
 
-## Часть 4: Операции и мониторинг
+## Part 4: Operations & Monitoring
 
-### Рецепт 16: Настройка Supervisor / Horizon
+### Recipe 16: Supervisor / Horizon Setup
 
-#### Использование Supervisor (Queue Worker)
+#### Using Supervisor (Queue Worker)
 
 ```ini
 ; /etc/supervisor/conf.d/delayed-process-worker.conf
@@ -1002,7 +1002,7 @@ stdout_logfile=/var/www/storage/logs/worker.log
 stopwaitsecs=3600
 ```
 
-#### Использование Supervisor (Synchronous Command)
+#### Using Supervisor (Synchronous Command)
 
 ```ini
 ; /etc/supervisor/conf.d/delayed-process-command.conf
@@ -1017,7 +1017,7 @@ redirect_stderr=true
 stdout_logfile=/var/www/storage/logs/delayed-process.log
 ```
 
-#### Использование Laravel Horizon
+#### Using Laravel Horizon
 
 ```php
 // config/horizon.php
@@ -1040,9 +1040,9 @@ stdout_logfile=/var/www/storage/logs/delayed-process.log
 
 ---
 
-### Рецепт 17: Плановая очистка
+### Recipe 17: Scheduled Cleanup
 
-Регистрация команды очистки в Laravel Scheduler.
+Register the cleanup command in Laravel Scheduler.
 
 ```php
 // app/Console/Kernel.php or routes/console.php (Laravel 11+)
@@ -1063,9 +1063,9 @@ Schedule::command('delayed:unstuck --timeout=60')
 
 ---
 
-### Рецепт 18: Мониторинг зависших процессов
+### Recipe 18: Stuck Process Monitoring
 
-Обнаружение зависших процессов и отправка оповещений.
+Detect stuck processes and send alerts.
 
 ```php
 // app/Console/Commands/MonitorDelayedProcesses.php
@@ -1107,7 +1107,7 @@ final class MonitorDelayedProcesses extends Command
 }
 ```
 
-**Расписание:**
+**Schedule:**
 
 ```php
 Schedule::command('monitor:delayed-processes --threshold=10')
@@ -1116,15 +1116,15 @@ Schedule::command('monitor:delayed-processes --threshold=10')
 
 ---
 
-### Рецепт 19: Обслуживание базы данных
+### Recipe 19: Database Maintenance
 
-#### PostgreSQL — Частичные индексы (уже созданы миграцией)
+#### PostgreSQL — Partial Indexes (Already Created by Migration)
 
-Миграция пакета уже создаёт оптимизированные частичные индексы для PostgreSQL. Дополнительная настройка не требуется.
+The package migration already creates optimized partial indexes for PostgreSQL. No additional setup needed.
 
-#### PostgreSQL — Разделение таблицы для больших объёмов
+#### PostgreSQL — Table Partitioning for High Volume
 
-Если обрабатываются миллионы отложенных процессов, рассмотрите диапазонное разделение по `created_at`:
+If you process millions of delayed processes, consider range partitioning by `created_at`:
 
 ```sql
 -- Convert to partitioned table (requires PostgreSQL 10+)
@@ -1141,7 +1141,7 @@ CREATE TABLE delayed_processes_y2026m02 PARTITION OF delayed_processes_partition
 -- ... add future partitions via cron/scheduler
 ```
 
-#### Регулярное обслуживание
+#### Regular Maintenance
 
 ```sql
 -- Analyze table statistics for query planner
@@ -1156,18 +1156,18 @@ SELECT
 
 ---
 
-## Часть 5: Устранение неполадок
+## Part 5: Troubleshooting
 
-### Проблема: Процесс зависает в статусе "wait" навечно
+### Problem: Process Stuck in "wait" Forever
 
-**Симптомы:** Статус процесса остаётся `wait`, никогда не переходит в `done` или `error`.
+**Symptoms:** Process status remains `wait`, never transitions to `done` or `error`.
 
-**Причины:**
-1. Worker очереди аварийно завершил работу во время выполнения
-2. Превышен timeout задачи, но процесс не был очищен
-3. Worker был перезагружен во время обработки
+**Causes:**
+1. Queue worker crashed during execution
+2. Job timeout exceeded but process wasn't cleaned up
+3. Worker was restarted while processing
 
-**Решения:**
+**Solutions:**
 
 ```bash
 # Check for stuck processes
@@ -1180,17 +1180,17 @@ php artisan delayed:unstuck
 php artisan delayed:unstuck --timeout=30
 ```
 
-**Профилактика:** Запланировать `delayed:unstuck` на выполнение каждые 15 минут (см. [Рецепт 18](#рецепт-18-мониторинг-зависших-процессов)).
+**Prevention:** Schedule `delayed:unstuck` to run every 15 minutes (see [Recipe 18](#recipe-18-stuck-process-monitoring)).
 
 ---
 
-### Проблема: Ошибка "Entity Not Allowed"
+### Problem: "Entity Not Allowed" Error
 
-**Симптомы:** `EntityNotAllowedException: Entity [App\Services\MyService] is not in the allowed_entities list.`
+**Symptoms:** `EntityNotAllowedException: Entity [App\Services\MyService] is not in the allowed_entities list.`
 
-**Причина:** Класс-обработчик не зарегистрирован в конфигурации.
+**Cause:** The handler class is not registered in the configuration.
 
-**Решение:**
+**Solution:**
 
 ```php
 // config/delayed-process.php
@@ -1199,29 +1199,29 @@ php artisan delayed:unstuck --timeout=30
 ],
 ```
 
-> **Важно:** Используйте полное имя класса (FQCN). Проверка разрешённого списка выполняется с использованием строгого сравнения.
+> **Important:** Use the fully qualified class name (FQCN). The allowlist is checked using strict equality.
 
 ---
 
-### Проблема: Ошибка CSRF Token Mismatch в SPA
+### Problem: CSRF Token Mismatch in SPA
 
-**Симптомы:** Запросы опроса статуса не удаются с ошибкой 419 (CSRF token mismatch).
+**Symptoms:** Status polling requests fail with 419 (CSRF token mismatch).
 
-**Причины:**
-1. SPA не отправляет CSRF token
-2. В HTML отсутствует `<meta name="csrf-token">`
+**Causes:**
+1. SPA is not sending the CSRF token
+2. `<meta name="csrf-token">` is missing from the HTML
 
-**Решения:**
+**Solutions:**
 
-**Вариант A:** Убедитесь, что meta-тег присутствует в HTML:
+**Option A:** Ensure the meta tag exists in your HTML:
 
 ```html
 <meta name="csrf-token" content="{{ csrf_token() }}">
 ```
 
-Frontend poller автоматически читает этот тег и включает токен.
+The frontend poller automatically reads this tag and includes the token.
 
-**Вариант B:** Передайте токен явно в конфиг:
+**Option B:** Pass the token explicitly in config:
 
 ```typescript
 applyAxiosInterceptor(api, {
@@ -1232,7 +1232,7 @@ applyAxiosInterceptor(api, {
 });
 ```
 
-**Вариант C:** Исключите endpoint статуса из проверки CSRF:
+**Option C:** Exclude the status endpoint from CSRF verification:
 
 ```php
 // app/Http/Middleware/VerifyCsrfToken.php
@@ -1243,15 +1243,15 @@ protected $except = [
 
 ---
 
-### Проблема: Время опроса истекло
+### Problem: Polling Timeout Exceeded
 
-**Симптомы:** `DelayedProcessError` выброшена без `error_message` с сервера. Процесс может всё ещё выполняться.
+**Symptoms:** `DelayedProcessError` thrown with no `error_message` from the server. The process may still be running.
 
-**Причины:**
-1. Процесс выполняется дольше, чем сконфигурированный `timeout` (по умолчанию: 5 минут)
-2. Превышен `maxAttempts` (по умолчанию: 100 попыток × 3s = 5 мин)
+**Causes:**
+1. Process takes longer than the configured `timeout` (default: 5 minutes)
+2. `maxAttempts` exceeded (default: 100 attempts × 3s = 5 min)
 
-**Решения:**
+**Solutions:**
 
 ```typescript
 // Increase timeouts for heavy operations
@@ -1263,7 +1263,7 @@ applyAxiosInterceptor(api, {
 });
 ```
 
-Также рассмотрите увеличение timeout задачи на backend:
+Also consider increasing the backend job timeout:
 
 ```php
 // config/delayed-process.php
@@ -1274,34 +1274,34 @@ applyAxiosInterceptor(api, {
 
 ---
 
-### Проблема: Race условия при высокой конкурентности
+### Problem: Race Conditions in High-Concurrency
 
-**Симптомы:** Один и тот же процесс выполняется несколько раз одновременно.
+**Symptoms:** Same process executed multiple times simultaneously.
 
-**Объяснение:** Это не должно происходить. Пакет использует атомарное получение:
+**Explanation:** This should not happen. The package uses atomic claiming:
 
 ```sql
 UPDATE delayed_processes SET status = 'wait', try = try + 1
 WHERE id = ? AND status = 'new'
 ```
 
-Только один worker может успешно получить процесс. Если наблюдается дублирование выполнения:
+Only one worker can successfully claim a process. If you observe duplicate execution:
 
-1. **Проверьте сброс `status='new'`:** Что-то сбрасывает процессы обратно в `new` во время их обработки?
-2. **Проверьте расписание `delayed:unstuck`:** Если timeout слишком короткий, он может сбросить законно работающий процесс обратно в `new`.
-3. **Увеличьте stuck timeout:** Установите `stuck_timeout_minutes` выше, чем ваша самая долгая ожидаемая операция.
+1. **Check for `status='new'` resets:** Is something resetting processes back to `new` while they're being processed?
+2. **Check `delayed:unstuck` schedule:** If the unstuck timeout is too short, it may reset a legitimately running process back to `new`.
+3. **Increase stuck timeout:** Set `stuck_timeout_minutes` higher than your longest expected operation.
 
 ---
 
-### Проблема: Утечки памяти при длительном polling
+### Problem: Memory Leaks with Long-Running Polling
 
-**Симптомы:** Использование памяти вкладки браузера растёт со временем во время опроса.
+**Symptoms:** Browser tab memory usage grows over time during polling.
 
-**Причины:**
-1. `patchXHR()` или `patchFetch()` не очищены при размонтировании компонента
-2. Несколько перехватчиков зарегистрировано без удаления
+**Causes:**
+1. `patchXHR()` or `patchFetch()` not cleaned up when component unmounts
+2. Multiple interceptors registered without removal
 
-**Решения:**
+**Solutions:**
 
 ```typescript
 // In Vue component — cleanup on unmount
@@ -1315,7 +1315,7 @@ onUnmounted(() => {
 });
 ```
 
-Для Axios, извлеките перехватчик при необходимости:
+For Axios, eject the interceptor when done:
 
 ```typescript
 const interceptorId = applyAxiosInterceptor(api, config);
@@ -1326,42 +1326,42 @@ api.interceptors.response.eject(interceptorId);
 
 ---
 
-### Проблема: Устаревшая миграция не удаётся
+### Problem: Legacy Migration Fails
 
-**Симптомы:** Команда `delayed:migrate-v1` завершается с ошибками SQL.
+**Symptoms:** `delayed:migrate-v1` command fails with SQL errors.
 
-**Основные причины и исправления:**
+**Common causes and fixes:**
 
-**1. Столбец уже существует:**
+**1. Column already exists:**
 
 ```
 SQLSTATE[42701]: Duplicate column: column "error_message" already exists
 ```
 
-Миграция была применена частично. Проверьте, какие столбцы существуют, и вручную примените остальные изменения, или удалите новые столбцы и пересчитайте.
+The migration was partially applied. Check which columns exist and manually apply remaining changes, or drop the new columns and re-run.
 
-**2. Доступ запрещён:**
+**2. Permission denied:**
 
 ```
 SQLSTATE[42501]: Insufficient privilege
 ```
 
-Пользователю базы данных нужны права ALTER TABLE. Запустите с привилегированным пользователем или дайте права.
+The database user needs ALTER TABLE permissions. Run with a privileged user or grant permissions.
 
-**3. Безопасность production:**
+**3. Production safety:**
 
 ```bash
 # The command requires --force in production
 php artisan delayed:migrate-v1 --force
 ```
 
-**4. Блокировка большой таблицы:**
+**4. Large table lock:**
 
-Для таблиц с миллионами строк ALTER TABLE может блокировать таблицу на длительный период. Рассмотрите:
-- Выполнение во время окна обслуживания
-- Использование `pg_repack` (PostgreSQL) или `pt-online-schema-change` (MySQL) для миграции без простоев
-- Миграция небольшими шагами вручную
+For tables with millions of rows, the ALTER TABLE may lock the table for an extended period. Consider:
+- Running during maintenance window
+- Using `pg_repack` (PostgreSQL) or `pt-online-schema-change` (MySQL) for zero-downtime migration
+- Migrating in smaller steps manually
 
 ---
 
-Вернуться к [README](README.ru.md)
+Back to [README](../../README.md)

@@ -1,11 +1,11 @@
 # Laravel Delayed Process
 
 [![Packagist Version](https://img.shields.io/packagist/v/dskripchenko/laravel-delayed-process)](https://packagist.org/packages/dskripchenko/laravel-delayed-process)
-[![License](https://img.shields.io/packagist/l/dskripchenko/laravel-delayed-process)](../LICENSE.md)
-[![PHP Version](https://img.shields.io/packagist/dependency-v/dskripchenko/laravel-delayed-process/php)](../composer.json)
-[![Laravel Version](https://img.shields.io/packagist/dependency-v/dskripchenko/laravel-delayed-process/laravel/framework)](../composer.json)
+[![License](https://img.shields.io/packagist/l/dskripchenko/laravel-delayed-process)](../../LICENSE.md)
+[![PHP Version](https://img.shields.io/packagist/dependency-v/dskripchenko/laravel-delayed-process/php)](../../composer.json)
+[![Laravel Version](https://img.shields.io/packagist/dependency-v/dskripchenko/laravel-delayed-process/laravel/framework)](../../composer.json)
 
-**Язык:** [English](../README.md) | [Русский](README.ru.md) | [Deutsch](README.de.md) | [中文](README.zh.md)
+**Язык:** [English](../../README.md) | [Русский](README.md) | [Deutsch](../de/README.md) | [中文](../zh/README.md)
 
 Асинхронное выполнение долгих операций в Laravel с отслеживанием по UUID, автоматическим повтором, белым списком безопасности и прозрачными фронтенд-перехватчиками для Axios, Fetch и XHR.
 
@@ -763,15 +763,15 @@ Frontend poller автоматически читает `<meta name="csrf-token"
 
 ## Книга рецептов
 
-Для рецептов, паттернов и решения проблем смотрите **[Книга рецептов](cookbook.ru.md)**.
+Для рецептов, паттернов и решения проблем смотрите **[Книга рецептов](cookbook.md)**.
 
-Доступна на: [English](cookbook.md) | [Русский](cookbook.ru.md) | [Deutsch](cookbook.de.md) | [中文](cookbook.zh.md)
+Доступна на: [English](../en/cookbook.md) | [Русский](cookbook.md) | [Deutsch](../de/cookbook.md) | [中文](../zh/cookbook.md)
 
 ---
 
 ## Руководство по интеграции с фронтендом
 
-Подробное пошаговое руководство по интеграции перехватчиков в приложения на **Vue.js 3** и **React** смотрите в **[Руководстве по Frontend перехватчикам](frontend-interceptors-guide.ru.md)**.
+Подробное пошаговое руководство по интеграции перехватчиков в приложения на **Vue.js 3** и **React** смотрите в **[Руководстве по Frontend перехватчикам](frontend-interceptors-guide.md)**.
 
 Включает: composables/хуки, отслеживание прогресса, групповой опрос, обработку ошибок, поддержку SSR и тестирование.
 
@@ -779,4 +779,4 @@ Frontend poller автоматически читает `<meta name="csrf-token"
 
 ## Лицензия
 
-[MIT](../LICENSE.md) &copy; Denis Skripchenko
+[MIT](../../LICENSE.md) &copy; Denis Skripchenko

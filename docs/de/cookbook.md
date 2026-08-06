@@ -1,8 +1,8 @@
 # Laravel Verzögerter Prozess — Kochbuch
 
-**Sprache:** [English](cookbook.md) | [Русский](cookbook.ru.md) | [Deutsch](cookbook.de.md) | [中文](cookbook.zh.md)
+**Sprache:** [English](../en/cookbook.md) | [Русский](../ru/cookbook.md) | [Deutsch](cookbook.md) | [中文](../zh/cookbook.md)
 
-Zurück zur [README](README.de.md)
+Zurück zur [README](README.md)
 
 Praktische Rezepte, Integrationsmuster und Fehlerbehebung für `dskripchenko/laravel-delayed-process`.
 
@@ -1364,4 +1364,4 @@ Bei Tabellen mit Millionen von Zeilen kann die ALTER TABLE die Tabelle für eine
 
 ---
 
-Zurück zur [README](README.de.md)
+Zurück zur [README](README.md)

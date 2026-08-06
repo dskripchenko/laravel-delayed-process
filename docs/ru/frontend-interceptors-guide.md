@@ -1,117 +1,117 @@
-# Integrationsleitfaden für Frontend-Interceptoren
+# Руководство по интеграции Frontend-перехватчиков
 
-**Sprache:** [English](frontend-interceptors-guide.md) | [Русский](frontend-interceptors-guide.ru.md) | Deutsch | [中文](frontend-interceptors-guide.zh.md) | Zurück zu [README](README.de.md)
+**Язык:** [English](../en/frontend-interceptors-guide.md) | Русский | [Deutsch](../de/frontend-interceptors-guide.md) | [中文](../zh/frontend-interceptors-guide.md) | Назад к [README](README.md)
 
-Detaillierter Leitfaden zur Integration von `laravel-delayed-process` Frontend-Interceptoren in **Vue.js 3** und **React** Anwendungen.
+Подробное руководство по интеграции frontend-перехватчиков `laravel-delayed-process` в приложения **Vue.js 3** и **React**.
 
 ---
 
-## Inhaltsverzeichnis
+## Оглавление
 
-- [Übersicht](#übersicht)
-- [Wie Interceptoren funktionieren](#wie-interceptoren-funktionieren)
-- [Verfügbare Interceptoren](#verfügbare-interceptoren)
-- [Vue.js 3-Integration](#vuejs-3-integration)
-  - [Projekt-Setup](#vue-projekt-setup)
-  - [Axios-Plugin](#vue-axios-plugin)
+- [Обзор](#обзор)
+- [Как работают перехватчики](#как-работают-перехватчики)
+- [Доступные перехватчики](#доступные-перехватчики)
+- [Интеграция Vue.js 3](#интеграция-vuejs-3)
+  - [Настройка проекта](#настройка-проекта-vue)
+  - [Axios плагин](#axios-плагин-vue)
   - [Composable: useDelayedProcess](#composable-usedelayedprocess)
-  - [Progress-Komponente](#vue-progress-komponente)
-  - [Fehlerbehandlung](#vue-fehlerbehandlung)
-  - [Batch-Operationen](#vue-batch-operationen)
-  - [Vollständiges Beispiel: Report-Seite](#vue-vollständiges-beispiel)
-- [React-Integration](#react-integration)
-  - [Projekt-Setup](#react-projekt-setup)
-  - [Axios-Instanz](#react-axios-instanz)
+  - [Компонент прогресса](#компонент-прогресса-vue)
+  - [Обработка ошибок](#обработка-ошибок-vue)
+  - [Массовые операции](#массовые-операции-vue)
+  - [Полный пример: страница отчётов](#полный-пример-vue)
+- [Интеграция React](#интеграция-react)
+  - [Настройка проекта](#настройка-проекта-react)
+  - [Экземпляр Axios](#экземпляр-axios-react)
   - [Hook: useDelayedProcess](#hook-usedelayedprocess)
-  - [Progress-Komponente](#react-progress-komponente)
-  - [Fehlerbehandlung](#react-fehlerbehandlung)
-  - [Batch-Operationen](#react-batch-operationen)
-  - [Vollständiges Beispiel: Export-Seite](#react-vollständiges-beispiel)
-- [Fortgeschrittene Themen](#fortgeschrittene-themen)
-  - [Mehrere API-Instanzen](#mehrere-api-instanzen)
-  - [SSR-Überlegungen](#ssr-überlegungen)
-  - [Tests](#tests)
-  - [TypeScript-Typen](#typescript-typen)
+  - [Компонент прогресса](#компонент-прогресса-react)
+  - [Обработка ошибок](#обработка-ошибок-react)
+  - [Массовые операции](#массовые-операции-react)
+  - [Полный пример: страница экспорта](#полный-пример-react)
+- [Продвинутые темы](#продвинутые-темы)
+  - [Несколько API-экземпляров](#несколько-api-экземпляров)
+  - [Соображения SSR](#соображения-ssr)
+  - [Тестирование](#тестирование)
+  - [TypeScript типы](#typescript-типы)
 
 ---
 
-## Übersicht
+## Обзор
 
-Das Frontend-Modul `delayed-process` fängt transparent API-Antworten ab, die eine Delayed-Process-UUID enthalten, pollt den Status-Endpoint bis zur Fertigstellung und gibt das Endergebnis so zurück, als würde die Operation synchron ablaufen.
+Модуль `delayed-process` для frontend'а прозрачно перехватывает API-ответы, содержащие UUID отложенного процесса, опрашивает статус-endpoint до завершения и возвращает окончательный результат так, как если бы операция была синхронной.
 
-**Unterstützte Interceptoren:**
+**Поддерживаемые перехватчики:**
 
-| Interceptor | HTTP-Client | Beste für |
-|-------------|-------------|----------|
-| `applyAxiosInterceptor()` | Axios | Vue.js, React, jedes Framework mit Axios |
-| `patchFetch()` | nativer `fetch` | React (SWR, React Query), Next.js |
-| `patchXHR()` | XMLHttpRequest | Legacy-Code, jQuery AJAX |
-| `BatchPoller` | nativer `fetch` | Bulk-Operationen mit mehreren UUIDs |
+| Перехватчик | HTTP-клиент | Лучше всего для |
+|-------------|-------------|-----------------|
+| `applyAxiosInterceptor()` | Axios | Vue.js, React, любой фреймворк с Axios |
+| `patchFetch()` | native `fetch` | React (SWR, React Query), Next.js |
+| `patchXHR()` | XMLHttpRequest | Устаревший код, jQuery AJAX |
+| `BatchPoller` | native `fetch` | Массовые операции с несколькими UUID |
 
-**Empfohlener Ansatz:** Verwende `applyAxiosInterceptor()` mit Axios für Vue.js und React Projekte.
+**Рекомендуемый подход:** используй `applyAxiosInterceptor()` с Axios для обоих проектов Vue.js и React.
 
 ---
 
-## Wie Interceptoren funktionieren
+## Как работают перехватчики
 
 ```
-1. Client sendet POST /api/reports/generate
-2. Server antwortet: { success: true, payload: { delayed: { uuid: "abc-123" } } }
-3. Interceptor erkennt die "delayed" Payload
-4. Interceptor startet Polling: GET /api/common/delayed-process/status?uuid=abc-123
-5. Poll-Antwort: { success: true, payload: { uuid: "abc-123", status: "wait", progress: 45 } }
-6. ... pollt alle N ms weiter ...
-7. Poll-Antwort: { success: true, payload: { uuid: "abc-123", status: "done", data: { url: "..." } } }
-8. Interceptor ersetzt die ursprüngliche Antwort mit den finalen Daten
-9. Client erhält das Ergebnis, als ob die Anfrage normal abgeschlossen wäre
+1. Клиент отправляет POST /api/reports/generate
+2. Сервер возвращает: { success: true, payload: { delayed: { uuid: "abc-123" } } }
+3. Перехватчик обнаруживает payload "delayed"
+4. Перехватчик начинает опрос: GET /api/common/delayed-process/status?uuid=abc-123
+5. Ответ опроса: { success: true, payload: { uuid: "abc-123", status: "wait", progress: 45 } }
+6. ... продолжает опрос каждые N мс ...
+7. Ответ опроса: { success: true, payload: { uuid: "abc-123", status: "done", data: { url: "..." } } }
+8. Перехватчик заменяет исходный ответ на окончательные данные
+9. Клиент получает результат так, как если бы запрос завершился нормально
 ```
 
-**Terminale Status, die das Polling stoppen:**
-- `done` — erfolg, gibt `data` zurück
-- `error` — wirft `DelayedProcessError`
-- `expired` — wirft `DelayedProcessError`
-- `cancelled` — wirft `DelayedProcessError`
+**Терминальные статусы, которые останавливают опрос:**
+- `done` — успешно, возвращает `data`
+- `error` — выбрасывает `DelayedProcessError`
+- `expired` — выбрасывает `DelayedProcessError`
+- `cancelled` — выбрасывает `DelayedProcessError`
 
 ---
 
-## Verfügbare Interceptoren
+## Доступные перехватчики
 
-### Konfigurationsoptionen
+### Параметры конфигурации
 
-Alle Interceptoren akzeptieren die gleiche `DelayedProcessConfig`:
+Все перехватчики принимают одну и ту же `DelayedProcessConfig`:
 
 ```typescript
 interface DelayedProcessConfig {
-  statusUrl: string;           // Standard: '/api/common/delayed-process/status'
-  pollingInterval: number;     // Standard: 3000 (ms)
-  maxAttempts: number;         // Standard: 100
-  timeout: number;             // Standard: 300_000 (5 min)
+  statusUrl: string;           // По умолчанию: '/api/common/delayed-process/status'
+  pollingInterval: number;     // По умолчанию: 3000 (мс)
+  maxAttempts: number;         // По умолчанию: 100
+  timeout: number;             // По умолчанию: 300_000 (5 мин)
   headers: Record<string, string>;
   onPoll?: (uuid: string, attempt: number) => void;
 }
 ```
 
-CSRF-Token aus `<meta name="csrf-token">` wird automatisch eingebunden.
+CSRF-токен из `<meta name="csrf-token">` включается автоматически.
 
 ---
 
-## Vue.js 3-Integration
+## Интеграция Vue.js 3
 
-### Vue Projekt-Setup
+### Настройка проекта Vue
 
-#### 1. Modul kopieren
+#### 1. Копирование модуля
 
-Kopiere `resources/js/delayed-process/` in das `src/shared/lib/delayed-process/` Verzeichnis deines Vue-Projekts (nach FSD-Architektur) oder `src/lib/delayed-process/`.
+Скопируй `resources/js/delayed-process/` в каталог `src/shared/lib/delayed-process/` (следуя архитектуре FSD) или `src/lib/delayed-process/` твоего Vue-проекта.
 
-#### 2. Axios installieren (falls noch nicht geschehen)
+#### 2. Установка Axios (если ещё не установлен)
 
 ```bash
 npm install axios
 ```
 
-### Vue Axios-Plugin
+### Axios плагин Vue
 
-Erstelle eine zentralisierte Axios-Instanz mit dem Delayed-Process-Interceptor:
+Создай централизованный экземпляр Axios с перехватчиком отложенного процесса:
 
 **`src/shared/api/http.ts`**
 
@@ -127,18 +127,18 @@ const api = axios.create({
   },
 });
 
-// Delayed-Process-Interceptor anwenden
+// Примени перехватчик отложенного процесса
 applyAxiosInterceptor(api, {
   statusUrl: '/api/common/delayed-process/status',
   pollingInterval: 2000,
   maxAttempts: 150,
-  timeout: 600_000,  // 10 min für schwere Operationen
+  timeout: 600_000,  // 10 мин для тяжёлых операций
 });
 
 export { api };
 ```
 
-**`src/app/plugins/api.ts`** (Vue-Plugin, optional)
+**`src/app/plugins/api.ts`** (Vue плагин, опционально)
 
 ```typescript
 import type { App } from 'vue';
@@ -168,7 +168,7 @@ app.mount('#app');
 
 ### Composable: useDelayedProcess
 
-Ein reaktives Composable, das den Zustand eines Delayed-Process-Aufrufs verfolgt:
+Реактивный composable, отслеживающий состояние вызова отложенного процесса:
 
 **`src/shared/composables/useDelayedProcess.ts`**
 
@@ -206,7 +206,7 @@ export function useDelayedProcess<T = unknown>(
         params: method === 'get' ? args[0] : undefined,
       });
 
-      // Interceptor hat bereits Delayed Process aufgelöst
+      // Перехватчик уже разрешил отложенный процесс
       const result = response.data?.payload ?? response.data;
       data.value = result as T;
 
@@ -236,7 +236,7 @@ export function useDelayedProcess<T = unknown>(
 }
 ```
 
-**Verwendung in einer Komponente:**
+**Использование в компоненте:**
 
 ```vue
 <script setup lang="ts">
@@ -271,9 +271,9 @@ async function generateReport(): Promise<void> {
 </template>
 ```
 
-### Vue Progress-Komponente
+### Компонент прогресса Vue
 
-Verfolge den Fortschritt während des Polling mit dem `onPoll` Callback:
+Отслеживай прогресс во время опроса с помощью обратного вызова `onPoll`:
 
 **`src/shared/composables/useDelayedProcessWithProgress.ts`**
 
@@ -310,12 +310,12 @@ export function useDelayedProcessWithProgress<T = unknown>(
       const response = await api.post(url, payload);
       const responseData = response.data as Record<string, unknown>;
 
-      // Prüfe, ob dies eine verzögerte Antwort war
+      // Проверь, был ли это отложенный ответ
       const delayedPayload = responseData?.payload as Record<string, unknown> | undefined;
       const delayed = delayedPayload?.delayed as { uuid: string } | undefined;
 
       if (delayed?.uuid) {
-        // Manuelles Polling mit Fortschritts-Tracking
+        // Опрашивай вручную с отслеживанием прогресса
         const config = resolveConfig({
           ...configOverrides,
           onPoll: async (uuid: string) => {
@@ -329,7 +329,7 @@ export function useDelayedProcessWithProgress<T = unknown>(
                 progress.value = statusPayload.progress;
               }
             } catch {
-              // Ignoriere Fehler beim Abrufen des Fortschritts
+              // Игнорируй ошибки получения прогресса
             }
           },
         });
@@ -341,7 +341,7 @@ export function useDelayedProcessWithProgress<T = unknown>(
         return result as T;
       }
 
-      // Keine verzögerte Antwort
+      // Не отложенный ответ
       data.value = (responseData?.payload ?? responseData) as T;
 
       return data.value;
@@ -362,7 +362,7 @@ export function useDelayedProcessWithProgress<T = unknown>(
 }
 ```
 
-**Progress-Bar-Komponente:**
+**Компонент полосы прогресса:**
 
 ```vue
 <script setup lang="ts">
@@ -413,11 +413,11 @@ const { data, isLoading, progress, error, execute } = useDelayedProcessWithProgr
 </style>
 ```
 
-### Vue Fehlerbehandlung
+### Обработка ошибок Vue
 
-Globaler Error Handler für Delayed-Process-Fehler:
+Глобальный обработчик ошибок для ошибок отложенного процесса:
 
-**`src/shared/api/http.ts`** (Error-Interceptor hinzufügen)
+**`src/shared/api/http.ts`** (добавь перехватчик ошибок)
 
 ```typescript
 import { DelayedProcessError } from '@/shared/lib/delayed-process';
@@ -426,7 +426,7 @@ api.interceptors.response.use(
   (response) => response,
   (error: unknown) => {
     if (error instanceof DelayedProcessError) {
-      // Behandle spezifische Status
+      // Обработай специфичные статусы
       switch (error.status) {
         case 'expired':
           console.warn(`Process ${error.uuid} expired`);
@@ -445,9 +445,9 @@ api.interceptors.response.use(
 );
 ```
 
-### Vue Batch-Operationen
+### Массовые операции Vue
 
-Für Operationen, die mehrere verzögerte Prozesse erstellen:
+Для операций, которые создают несколько отложенных процессов:
 
 ```vue
 <script setup lang="ts">
@@ -462,17 +462,17 @@ async function exportAll(ids: number[]): Promise<void> {
   isLoading.value = true;
 
   try {
-    // Alle Prozesse erstellen
+    // Создай все процессы
     const responses = await Promise.all(
       ids.map((id) => api.post('/exports/generate', { id })),
     );
 
-    // UUIDs extrahieren
+    // Извлеки UUID
     const uuids = responses.map(
       (r) => (r.data.payload.delayed as { uuid: string }).uuid,
     );
 
-    // Batch-Polling
+    // Массовый опрос
     const poller = new BatchPoller({
       batchStatusUrl: '/api/common/delayed-process/batch-status',
       pollingInterval: 3000,
@@ -489,7 +489,7 @@ async function exportAll(ids: number[]): Promise<void> {
 </script>
 ```
 
-### Vue Vollständiges Beispiel
+### Полный пример Vue
 
 **`src/pages/ReportPage.vue`**
 
@@ -561,21 +561,21 @@ async function onSubmit(): Promise<void> {
 
 ---
 
-## React-Integration
+## Интеграция React
 
-### React Projekt-Setup
+### Настройка проекта React
 
-#### 1. Modul kopieren
+#### 1. Копирование модуля
 
-Kopiere `resources/js/delayed-process/` in das `src/lib/delayed-process/` oder `src/shared/delayed-process/` Verzeichnis deines React-Projekts.
+Скопируй `resources/js/delayed-process/` в каталог `src/lib/delayed-process/` или `src/shared/delayed-process/` твоего React-проекта.
 
-#### 2. Axios installieren
+#### 2. Установка Axios
 
 ```bash
 npm install axios
 ```
 
-### React Axios-Instanz
+### Экземпляр Axios React
 
 **`src/lib/api.ts`**
 
@@ -627,7 +627,7 @@ export function useDelayedProcess<T = unknown>(
 
   const execute = useCallback(
     async (payload?: Record<string, unknown>): Promise<T | null> => {
-      // Brich vorherige Anfrage ab
+      // Отмени предыдущий запрос
       abortRef.current?.abort();
       abortRef.current = new AbortController();
 
@@ -678,7 +678,7 @@ export function useDelayedProcess<T = unknown>(
 }
 ```
 
-**Verwendung:**
+**Использование:**
 
 ```tsx
 import { useDelayedProcess } from '@/hooks/useDelayedProcess';
@@ -709,7 +709,7 @@ function ReportButton() {
 }
 ```
 
-### React Progress-Komponente
+### Компонент прогресса React
 
 **`src/hooks/useDelayedProcessWithProgress.ts`**
 
@@ -766,7 +766,7 @@ export function useDelayedProcessWithProgress<T = unknown>(
                   setProgress(p);
                 }
               } catch {
-                // Ignorieren
+                // Игнорируй ошибки
               }
             },
           });
@@ -801,7 +801,7 @@ export function useDelayedProcessWithProgress<T = unknown>(
 }
 ```
 
-**Progress-Bar-Komponente:**
+**Компонент полосы прогресса:**
 
 ```tsx
 interface ProgressBarProps {
@@ -839,7 +839,7 @@ function ProgressBar({ progress }: ProgressBarProps) {
   );
 }
 
-// Verwendung:
+// Использование:
 function ExportPage() {
   const { data, isLoading, progress, error, execute } =
     useDelayedProcessWithProgress<{ url: string }>('/exports/generate');
@@ -857,9 +857,9 @@ function ExportPage() {
 }
 ```
 
-### React Fehlerbehandlung
+### Обработка ошибок React
 
-Erstelle einen Error Boundary für Delayed-Process-Fehler:
+Создай Error Boundary для ошибок отложенного процесса:
 
 **`src/components/DelayedProcessErrorBoundary.tsx`**
 
@@ -913,7 +913,7 @@ export class DelayedProcessErrorBoundary extends Component<Props, State> {
 }
 ```
 
-### React Batch-Operationen
+### Массовые операции React
 
 ```tsx
 import { useState } from 'react';
@@ -928,7 +928,7 @@ function BulkExport({ ids }: { ids: number[] }) {
     setIsLoading(true);
 
     try {
-      // Alle Prozesse erstellen
+      // Создай все процессы
       const responses = await Promise.all(
         ids.map((id) => api.post('/exports/generate', { id })),
       );
@@ -937,7 +937,7 @@ function BulkExport({ ids }: { ids: number[] }) {
         (r) => (r.data.payload.delayed as { uuid: string }).uuid,
       );
 
-      // Batch-Polling für alle auf einmal
+      // Массовый опрос всех одновременно
       const poller = new BatchPoller({
         batchStatusUrl: '/api/common/delayed-process/batch-status',
         pollingInterval: 3000,
@@ -964,7 +964,7 @@ function BulkExport({ ids }: { ids: number[] }) {
 }
 ```
 
-### React Vollständiges Beispiel
+### Полный пример React
 
 **`src/pages/ExportPage.tsx`**
 
@@ -1051,34 +1051,34 @@ export function ExportPage() {
 
 ---
 
-## Fortgeschrittene Themen
+## Продвинутые темы
 
-### Mehrere API-Instanzen
+### Несколько API-экземпляров
 
-Wenn verschiedene API-Endpoints unterschiedliche Status-URLs verwenden:
+Когда разные API-endpoints используют разные URL статусов:
 
 ```typescript
 import axios from 'axios';
 import { applyAxiosInterceptor } from '@/lib/delayed-process';
 
-// Haupt-API
+// Основной API
 const mainApi = axios.create({ baseURL: '/api/v1' });
 applyAxiosInterceptor(mainApi, {
   statusUrl: '/api/v1/delayed-process/status',
 });
 
-// Admin-API mit längerem Timeout
+// Admin API с более длительным таймаутом
 const adminApi = axios.create({ baseURL: '/api/admin' });
 applyAxiosInterceptor(adminApi, {
   statusUrl: '/api/admin/delayed-process/status',
-  timeout: 900_000,  // 15 min
+  timeout: 900_000,  // 15 мин
   pollingInterval: 5000,
 });
 ```
 
-### SSR-Überlegungen
+### Соображения SSR
 
-Die Interceptoren basieren auf Browser-APIs (`window.fetch`, `XMLHttpRequest`, DOM für CSRF). In SSR-Umgebungen (Nuxt, Next.js):
+Перехватчики полагаются на browser APIs (`window.fetch`, `XMLHttpRequest`, DOM для CSRF). В SSR-окружениях (Nuxt, Next.js):
 
 **Nuxt 3:**
 
@@ -1095,7 +1095,7 @@ export default defineNuxtPlugin(() => {
 **Next.js:**
 
 ```typescript
-// Nur in Client-Komponenten anwenden
+// Применяй только в клиентских компонентах
 'use client';
 
 import { useEffect } from 'react';
@@ -1117,7 +1117,7 @@ export function DelayedProcessProvider({ children }: { children: React.ReactNode
 }
 ```
 
-### Tests
+### Тестирование
 
 #### Vue (Vitest)
 
@@ -1167,31 +1167,31 @@ it('returns resolved data', async () => {
 });
 ```
 
-### TypeScript-Typen
+### TypeScript типы
 
-Alle Typen werden vom Haupt-Entry-Point exportiert:
+Все типы экспортируются из главной точки входа:
 
 ```typescript
 import type {
   ProcessStatus,           // 'new' | 'wait' | 'done' | 'error' | 'expired' | 'cancelled'
-  DelayedProcessConfig,    // Konfiguration für Interceptoren
-  StatusResponsePayload,   // Shape der Status-Endpoint-Antwort
-  StatusResponse,          // Wrapper mit Success-Flag
-  DelayedPayload,          // Shape der anfänglichen verzögerten Antwort
-  DelayedApiResponse,      // Vollständige API-Antwort mit verzögerter Payload
-  BatchStatusResponse,     // Batch-Status-Endpoint-Antwort
-  BatchPollerConfig,       // Konfiguration für BatchPoller
+  DelayedProcessConfig,    // Конфигурация для перехватчиков
+  StatusResponsePayload,   // Форма ответа endpoint'а статуса
+  StatusResponse,          // Обёртка с флагом успеха
+  DelayedPayload,          // Форма начального отложенного ответа
+  DelayedApiResponse,      // Полный API-ответ с отложенным payload'ом
+  BatchStatusResponse,     // Ответ endpoint'а массового статуса
+  BatchPollerConfig,       // Конфигурация для BatchPoller
 } from '@/lib/delayed-process';
 
 import {
-  applyAxiosInterceptor,  // Axios-Interceptor
-  patchFetch,              // Fetch Monkey-Patch
-  patchXHR,               // XHR Monkey-Patch
-  BatchPoller,             // Batch-Polling-Klasse
-  pollUntilDone,           // Manuelle Polling-Funktion
-  resolveConfig,           // Config Resolver mit CSRF
-  DEFAULT_CONFIG,          // Standardkonfigurationswerte
+  applyAxiosInterceptor,  // Axios перехватчик
+  patchFetch,              // Monkey-patch для Fetch
+  patchXHR,               // Monkey-patch для XHR
+  BatchPoller,             // Класс массового опроса
+  pollUntilDone,           // Функция ручного опроса
+  resolveConfig,           // Резолвер конфигурации с CSRF
+  DEFAULT_CONFIG,          // Значения конфигурации по умолчанию
   POLL_HEADER,             // 'X-Delayed-Process-Poll'
-  DelayedProcessError,     // Error-Klasse mit uuid/status
+  DelayedProcessError,     // Класс ошибки с uuid/status
 } from '@/lib/delayed-process';
 ```

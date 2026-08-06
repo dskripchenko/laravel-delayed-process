@@ -1,11 +1,11 @@
 # Laravel Delayed Process
 
 [![Packagist Version](https://img.shields.io/packagist/v/dskripchenko/laravel-delayed-process)](https://packagist.org/packages/dskripchenko/laravel-delayed-process)
-[![License](https://img.shields.io/packagist/l/dskripchenko/laravel-delayed-process)](../LICENSE.md)
-[![PHP Version](https://img.shields.io/packagist/dependency-v/dskripchenko/laravel-delayed-process/php)](../composer.json)
-[![Laravel Version](https://img.shields.io/packagist/dependency-v/dskripchenko/laravel-delayed-process/laravel/framework)](../composer.json)
+[![License](https://img.shields.io/packagist/l/dskripchenko/laravel-delayed-process)](../../LICENSE.md)
+[![PHP Version](https://img.shields.io/packagist/dependency-v/dskripchenko/laravel-delayed-process/php)](../../composer.json)
+[![Laravel Version](https://img.shields.io/packagist/dependency-v/dskripchenko/laravel-delayed-process/laravel/framework)](../../composer.json)
 
-**Sprache:** [English](../README.md) | [Русский](README.ru.md) | [Deutsch](README.de.md) | [中文](README.zh.md)
+**Sprache:** [English](../../README.md) | [Русский](../ru/README.md) | [Deutsch](README.md) | [中文](../zh/README.md)
 
 Asynchrone Ausführung langwieriger Operationen in Laravel mit UUID-basiertem Tracking, automatischen Wiederholungsversuchen, Sicherheits-Allowlist und transparenten Frontend-Interceptoren für Axios, Fetch und XHR.
 
@@ -763,15 +763,15 @@ Der Frontend-Poller liest automatisch `<meta name="csrf-token">` und fügt es in
 
 ## Kochbuch
 
-Für Rezepte, Muster und Fehlerbehebung, siehe das **[Kochbuch](cookbook.de.md)**.
+Für Rezepte, Muster und Fehlerbehebung, siehe das **[Kochbuch](cookbook.md)**.
 
-Verfügbar in: [English](cookbook.md) | [Русский](cookbook.ru.md) | [Deutsch](cookbook.de.md) | [中文](cookbook.zh.md)
+Verfügbar in: [English](../en/cookbook.md) | [Русский](../ru/cookbook.md) | [Deutsch](cookbook.md) | [中文](../zh/cookbook.md)
 
 ---
 
 ## Frontend-Integrationsleitfaden
 
-Für einen ausführlichen Schritt-für-Schritt-Leitfaden zur Integration von Interceptoren in **Vue.js 3** und **React**-Anwendungen, siehe den **[Frontend-Interceptoren-Leitfaden](frontend-interceptors-guide.de.md)**.
+Für einen ausführlichen Schritt-für-Schritt-Leitfaden zur Integration von Interceptoren in **Vue.js 3** und **React**-Anwendungen, siehe den **[Frontend-Interceptoren-Leitfaden](frontend-interceptors-guide.md)**.
 
 Enthält: Composables/Hooks, Fortschrittsanzeige, Batch-Abfrage, Fehlerbehandlung, SSR-Unterstützung und Testen.
 
@@ -779,4 +779,4 @@ Enthält: Composables/Hooks, Fortschrittsanzeige, Batch-Abfrage, Fehlerbehandlun
 
 ## Lizenz
 
-[MIT](../LICENSE.md) &copy; Denis Skripchenko
+[MIT](../../LICENSE.md) &copy; Denis Skripchenko

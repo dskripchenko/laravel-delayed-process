@@ -1,8 +1,8 @@
 # Laravel 延迟进程 — 实用手册
 
-**语言:** [English](cookbook.md) | [Русский](cookbook.ru.md) | [Deutsch](cookbook.de.md) | [中文](cookbook.zh.md)
+**语言:** [English](../en/cookbook.md) | [Русский](../ru/cookbook.md) | [Deutsch](../de/cookbook.md) | [中文](cookbook.md)
 
-返回 [README](README.zh.md)
+返回 [README](README.md)
 
 `dskripchenko/laravel-delayed-process` 的实用方案、集成模式和故障排除。
 
@@ -1364,4 +1364,4 @@ php artisan delayed:migrate-v1 --force
 
 ---
 
-返回 [README](README.zh.md)
+返回 [README](README.md)

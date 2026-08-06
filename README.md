@@ -5,7 +5,7 @@
 [![PHP Version](https://img.shields.io/packagist/dependency-v/dskripchenko/laravel-delayed-process/php)](composer.json)
 [![Laravel Version](https://img.shields.io/packagist/dependency-v/dskripchenko/laravel-delayed-process/laravel/framework)](composer.json)
 
-**Language:** [English](README.md) | [Русский](docs/README.ru.md) | [Deutsch](docs/README.de.md) | [中文](docs/README.zh.md)
+**Language:** [English](README.md) | [Русский](docs/ru/README.md) | [Deutsch](docs/de/README.md) | [中文](docs/zh/README.md)
 
 Asynchronous execution of long-running operations in Laravel with UUID-based tracking, automatic retry, security allowlist, and transparent frontend interceptors for Axios, Fetch, and XHR.
 
@@ -763,15 +763,15 @@ The frontend poller automatically reads `<meta name="csrf-token">` and includes 
 
 ## Cookbook
 
-For recipes, patterns, and troubleshooting, see the **[Cookbook](docs/cookbook.md)**.
+For recipes, patterns, and troubleshooting, see the **[Cookbook](docs/en/cookbook.md)**.
 
-Available in: [English](docs/cookbook.md) | [Русский](docs/cookbook.ru.md) | [Deutsch](docs/cookbook.de.md) | [中文](docs/cookbook.zh.md)
+Available in: [English](docs/en/cookbook.md) | [Русский](docs/ru/cookbook.md) | [Deutsch](docs/de/cookbook.md) | [中文](docs/zh/cookbook.md)
 
 ---
 
 ## Frontend Integration Guide
 
-For a detailed step-by-step guide on integrating interceptors into **Vue.js 3** and **React** applications, see the **[Frontend Interceptors Guide](docs/frontend-interceptors-guide.md)**.
+For a detailed step-by-step guide on integrating interceptors into **Vue.js 3** and **React** applications, see the **[Frontend Interceptors Guide](docs/en/frontend-interceptors-guide.md)**.
 
 Includes: composables/hooks, progress tracking, batch polling, error handling, SSR support, and testing.
 
