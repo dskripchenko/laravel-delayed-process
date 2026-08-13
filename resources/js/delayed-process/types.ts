@@ -1,17 +1,17 @@
 export type ProcessStatus = 'new' | 'wait' | 'done' | 'error' | 'expired' | 'cancelled';
 
 export interface DelayedProcessConfig {
-  /** URL статус-эндпоинта, напр. '/api/common/delayed-process/status' */
+  /** The URL of the status endpoint, e.g. '/api/common/delayed-process/status' */
   statusUrl: string;
-  /** Интервал поллинга, ms (default: 3000) */
+  /** The polling interval, ms (default: 3000) */
   pollingInterval: number;
-  /** Макс. попыток поллинга (default: 100) */
+  /** The maximum number of polls (default: 100) */
   maxAttempts: number;
-  /** Общий таймаут, ms (default: 300_000 = 5 мин) */
+  /** The overall timeout, ms (default: 300_000 = 5 minutes) */
   timeout: number;
-  /** Доп. заголовки (CSRF и т.д.) */
+  /** Extra headers (CSRF and the like) */
   headers: Record<string, string>;
-  /** Callback при каждом полле */
+  /** A callback fired on every poll */
   onPoll?: (uuid: string, attempt: number) => void;
 }
 
@@ -52,15 +52,15 @@ export interface BatchStatusResponse {
 }
 
 export interface BatchPollerConfig {
-  /** URL для batch-запроса статусов */
+  /** The URL for the batch status request */
   batchStatusUrl: string;
-  /** Интервал поллинга, ms (default: 3000) */
+  /** The polling interval, ms (default: 3000) */
   pollingInterval: number;
-  /** Общий таймаут, ms (default: 300_000) */
+  /** The overall timeout, ms (default: 300_000) */
   timeout: number;
-  /** Макс. попыток поллинга (default: 100) */
+  /** The maximum number of polls (default: 100) */
   maxAttempts: number;
-  /** Доп. заголовки */
+  /** Extra headers */
   headers: Record<string, string>;
 }
 
