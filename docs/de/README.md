@@ -114,6 +114,29 @@ final class ReportService
 }
 ```
 
+**Fortschritt melden.** `ProcessProgressInterface` injizieren (oder innerhalb der Methode per `app()` auflösen) und `setProgress(0..100)` aufrufen; der Status-Endpunkt liefert den Wert, solange der Prozess läuft. Bei Erfolg setzt der Runner 100.
+
+```php
+use Dskripchenko\DelayedProcess\Contracts\ProcessProgressInterface;
+
+final class ImportService
+{
+    public function __construct(
+        private readonly ProcessProgressInterface $progress,
+    ) {}
+
+    public function run(array $rows): array
+    {
+        foreach ($rows as $i => $row) {
+            $this->import($row);
+            $this->progress->setProgress(intdiv(($i + 1) * 100, count($rows)));
+        }
+
+        return ['imported' => count($rows)];
+    }
+}
+```
+
 ### 2. Verzögerten Prozess auslösen (Backend)
 
 ```php

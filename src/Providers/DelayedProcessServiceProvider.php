@@ -31,8 +31,14 @@ final class DelayedProcessServiceProvider extends ServiceProvider
 
         $this->app->bind(ProcessRunnerInterface::class, DelayedProcessRunner::class);
         $this->app->bind(ProcessFactoryInterface::class, DelayedProcessFactory::class);
-        $this->app->bind(ProcessLoggerInterface::class, DelayedProcessLogger::class);
-        $this->app->bind(ProcessProgressInterface::class, DelayedProcessProgress::class);
+
+        // Scoped, so the job, the runner and the handler it calls share one
+        // logger and one progress tracker per job (or request), and the queue
+        // worker starts the next job with fresh ones.
+        $this->app->scoped(DelayedProcessLogger::class);
+        $this->app->scoped(ProcessLoggerInterface::class, DelayedProcessLogger::class);
+        $this->app->scoped(DelayedProcessProgress::class);
+        $this->app->scoped(ProcessProgressInterface::class, DelayedProcessProgress::class);
         $this->app->singleton(Dispatcher::class);
     }
 

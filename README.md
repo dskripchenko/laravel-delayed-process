@@ -114,6 +114,29 @@ final class ReportService
 }
 ```
 
+**Reporting progress.** Inject `ProcessProgressInterface` (or resolve it with `app()` inside the method) and call `setProgress(0..100)`; the status endpoint returns the value while the process runs. The runner sets 100 on success.
+
+```php
+use Dskripchenko\DelayedProcess\Contracts\ProcessProgressInterface;
+
+final class ImportService
+{
+    public function __construct(
+        private readonly ProcessProgressInterface $progress,
+    ) {}
+
+    public function run(array $rows): array
+    {
+        foreach ($rows as $i => $row) {
+            $this->import($row);
+            $this->progress->setProgress(intdiv(($i + 1) * 100, count($rows)));
+        }
+
+        return ['imported' => count($rows)];
+    }
+}
+```
+
 ### 2. Trigger a Delayed Process (Backend)
 
 ```php

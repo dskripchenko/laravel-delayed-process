@@ -114,6 +114,29 @@ final class ReportService
 }
 ```
 
+**Прогресс.** Внедрите `ProcessProgressInterface` (или получите его через `app()` внутри метода) и вызывайте `setProgress(0..100)`; эндпоинт статуса отдаёт значение, пока процесс выполняется. При успехе раннер выставляет 100.
+
+```php
+use Dskripchenko\DelayedProcess\Contracts\ProcessProgressInterface;
+
+final class ImportService
+{
+    public function __construct(
+        private readonly ProcessProgressInterface $progress,
+    ) {}
+
+    public function run(array $rows): array
+    {
+        foreach ($rows as $i => $row) {
+            $this->import($row);
+            $this->progress->setProgress(intdiv(($i + 1) * 100, count($rows)));
+        }
+
+        return ['imported' => count($rows)];
+    }
+}
+```
+
 ### 2. Запустите отложенный процесс (Backend)
 
 ```php

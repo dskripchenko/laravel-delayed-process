@@ -114,6 +114,29 @@ final class ReportService
 }
 ```
 
+**上报进度。** 注入 `ProcessProgressInterface`（或在方法内通过 `app()` 获取），调用 `setProgress(0..100)`；进程运行期间状态接口会返回该值。成功完成时 runner 会设置为 100。
+
+```php
+use Dskripchenko\DelayedProcess\Contracts\ProcessProgressInterface;
+
+final class ImportService
+{
+    public function __construct(
+        private readonly ProcessProgressInterface $progress,
+    ) {}
+
+    public function run(array $rows): array
+    {
+        foreach ($rows as $i => $row) {
+            $this->import($row);
+            $this->progress->setProgress(intdiv(($i + 1) * 100, count($rows)));
+        }
+
+        return ['imported' => count($rows)];
+    }
+}
+```
+
 ### 2. 触发延时过程（后端）
 
 ```php
