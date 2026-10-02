@@ -8,6 +8,19 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 Entries for releases published before this file existed were reconstructed from
 the tagged commit history.
 
+## [Unreleased]
+
+### Fixed
+- A process created with named parameters, such as `make($entity, $method, ...['model' => $class])`,
+  failed with a `TypeError`: the runner passed the whole associative array as the handler's
+  first argument instead of binding `$model`. A string-keyed parameter set whose every key
+  names a handler parameter is now passed by name: key order does not matter, parameters
+  left out take their defaults, and a required class- or interface-typed parameter is
+  resolved from the container. An empty parameter set is bound the same way. A list is
+  still passed positionally, and any other associative array (a key the handler does not
+  declare, or mixed integer and string keys) is still passed whole as one argument, so
+  handlers declared as `handle(array $params)` keep working.
+
 ## [2.1.2] - 2026-10-02
 
 ### Fixed

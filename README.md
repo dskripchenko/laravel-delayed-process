@@ -405,6 +405,36 @@ $process = $factory->make(
 7. Fires `ProcessCreated` event
 8. Returns the persisted model
 
+#### Handler Parameters
+
+The runner calls the handler with the stored parameters as follows:
+
+- **A list** (`[$userId, $filters]`) is passed positionally, in order.
+- **A string-keyed array whose every key names a handler parameter** (what `make(...)` stores
+  when it is called with named arguments, e.g. `...['model' => Article::class]`) is passed
+  **by name**. Key order does not matter, parameters left out take their defaults, and a
+  required parameter typed with a class or interface is resolved from the container.
+  An empty parameter set is bound the same way, so a handler may declare its dependencies.
+- **Any other associative array** (a key the handler does not declare, or a mix of integer
+  and string keys) is passed whole as the single argument, so `handle(array $params)` keeps
+  receiving the full array.
+
+```php
+// Stored as {"model": "App\\Models\\Article", "limit": 500}
+$factory->make(ExportService::class, 'export', ...['model' => Article::class, 'limit' => 500]);
+
+final class ExportService
+{
+    public function export(string $model, Exporter $exporter, int $limit = 1000, string $format = 'csv'): array
+    {
+        // $exporter comes from the container, $format keeps its default
+    }
+}
+```
+
+A variadic parameter is never bound by name. If a key is misspelt, the array no longer matches
+the signature and is passed whole, which usually ends in a `TypeError` naming the handler.
+
 #### Creating with Webhook Callback
 
 ```php

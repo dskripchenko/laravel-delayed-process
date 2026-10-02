@@ -405,6 +405,32 @@ $process = $factory->make(
 7. 触发 `ProcessCreated` 事件
 8. 返回持久化的模型
 
+#### 处理器参数
+
+运行器按以下规则用已保存的参数调用处理器：
+
+- **列表**（`[$userId, $filters]`）按顺序以位置参数传递。
+- **所有键都是处理器参数名的字符串键数组**（`make(...)` 以命名参数调用时保存的形式，
+  例如 `...['model' => Article::class]`）**按名称**传递。键的顺序无关紧要，未传的参数使用默认值，
+  类型为类或接口的必需参数从容器解析。空参数集也按同样方式绑定，因此处理器可以声明依赖。
+- **其他任何关联数组**（含有处理器未声明的键，或整数键与字符串键混合）作为单个参数整体传递，
+  因此 `handle(array $params)` 仍然收到完整数组。
+
+```php
+// Stored as {"model": "App\\Models\\Article", "limit": 500}
+$factory->make(ExportService::class, 'export', ...['model' => Article::class, 'limit' => 500]);
+
+final class ExportService
+{
+    public function export(string $model, Exporter $exporter, int $limit = 1000, string $format = 'csv'): array
+    {
+        // $exporter comes from the container, $format keeps its default
+    }
+}
+```
+
+可变参数从不按名称绑定。键名拼写错误会使数组不再匹配签名，于是被整体传递，通常以带有处理器名称的 `TypeError` 结束。
+
 #### 使用 Webhook 回调创建
 
 ```php
