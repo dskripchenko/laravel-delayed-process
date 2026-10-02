@@ -8,7 +8,7 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 Entries for releases published before this file existed were reconstructed from
 the tagged commit history.
 
-## [Unreleased]
+## [2.1.2] - 2026-10-02
 
 ### Fixed
 - A handler could not report progress: the runner kept a private progress tracker and the
