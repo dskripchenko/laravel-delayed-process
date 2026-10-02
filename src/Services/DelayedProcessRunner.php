@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dskripchenko\DelayedProcess\Services;
 
 use Dskripchenko\DelayedProcess\Contracts\ProcessLoggerInterface;
+use Dskripchenko\DelayedProcess\Contracts\ProcessProgressInterface;
 use Dskripchenko\DelayedProcess\Contracts\ProcessRunnerInterface;
 use Dskripchenko\DelayedProcess\Enums\ProcessStatus;
 use Dskripchenko\DelayedProcess\Events\ProcessCompleted;
@@ -14,12 +15,20 @@ use Dskripchenko\DelayedProcess\Models\DelayedProcess;
 
 final class DelayedProcessRunner implements ProcessRunnerInterface
 {
+    /**
+     * The tracker handlers report to. It has to be the instance the container
+     * hands out, or what a handler reports goes to a tracker with no process.
+     */
+    private readonly ProcessProgressInterface $progress;
+
     public function __construct(
         private readonly CallableResolver $resolver,
         private readonly ProcessLoggerInterface $logger,
         private readonly CallbackDispatcher $callbackDispatcher = new CallbackDispatcher(),
-        private readonly DelayedProcessProgress $progress = new DelayedProcessProgress(),
-    ) {}
+        ?ProcessProgressInterface $progress = null,
+    ) {
+        $this->progress = $progress ?? app(ProcessProgressInterface::class);
+    }
 
     public function run(DelayedProcess $process): void
     {
@@ -36,7 +45,7 @@ final class DelayedProcessRunner implements ProcessRunnerInterface
         }
 
         $this->logger->setProcess($claimed);
-        $this->progress->setProcess($claimed);
+        $this->attachProgress($claimed);
 
         $claimed->started_at = now();
         $claimed->save();
@@ -68,8 +77,21 @@ final class DelayedProcessRunner implements ProcessRunnerInterface
             ProcessFailed::dispatch($claimed, $e);
         } finally {
             $this->logger->flush();
+            $this->attachProgress(null);
             $claimed->save();
             $this->callbackDispatcher->dispatch($claimed);
+        }
+    }
+
+    /**
+     * Points the progress tracker at the running process, or detaches it.
+     * A custom ProcessProgressInterface binding takes part when it has a
+     * setProcess() method; the contract itself does not require one.
+     */
+    private function attachProgress(?DelayedProcess $process): void
+    {
+        if (method_exists($this->progress, 'setProcess')) {
+            $this->progress->setProcess($process);
         }
     }
 

@@ -8,6 +8,21 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 Entries for releases published before this file existed were reconstructed from
 the tagged commit history.
 
+## [Unreleased]
+
+### Fixed
+- A handler could not report progress: the runner kept a private progress tracker and the
+  container handed handlers a fresh one with no process attached, so `setProgress()` was a
+  no-op and pollers saw only 0 and then 100. The tracker is now a scoped binding shared by
+  the runner and the handler, attached for the duration of the run and detached afterwards.
+- Log lines a handler writes while running through `DelayedProcessJob` are stored on the
+  process again: the job and the runner now share one scoped logger instead of two.
+
+### Changed
+- `DelayedProcessRunner` takes an optional `ProcessProgressInterface` (defaulting to the
+  container binding) instead of a `DelayedProcessProgress`, and
+  `DelayedProcessProgress::setProcess()` accepts `null` to detach.
+
 ## [2.1.1] - 2026-07-20
 
 ### Added
