@@ -405,6 +405,37 @@ $process = $factory->make(
 7. Feuert `ProcessCreated` Ereignis
 8. Gibt das persistierte Modell zurück
 
+#### Handler-Parameter
+
+Der Runner ruft den Handler mit den gespeicherten Parametern wie folgt auf:
+
+- **Eine Liste** (`[$userId, $filters]`) wird positionsweise in ihrer Reihenfolge übergeben.
+- **Ein Array mit String-Schlüsseln, deren jeder einen Handler-Parameter benennt** (so speichert
+  `make(...)` benannte Argumente, z. B. `...['model' => Article::class]`), wird **per Name**
+  übergeben. Die Reihenfolge der Schlüssel spielt keine Rolle, ausgelassene Parameter erhalten
+  ihren Standardwert, und ein Pflichtparameter mit Klassen- oder Interface-Typ wird aus dem
+  Container aufgelöst. Ein leerer Parametersatz wird genauso gebunden, ein Handler kann also
+  seine Abhängigkeiten deklarieren.
+- **Jedes andere assoziative Array** (ein Schlüssel, den der Handler nicht deklariert, oder
+  gemischte Integer- und String-Schlüssel) wird als ein einziges Argument übergeben, sodass
+  `handle(array $params)` weiterhin das ganze Array erhält.
+
+```php
+// Stored as {"model": "App\\Models\\Article", "limit": 500}
+$factory->make(ExportService::class, 'export', ...['model' => Article::class, 'limit' => 500]);
+
+final class ExportService
+{
+    public function export(string $model, Exporter $exporter, int $limit = 1000, string $format = 'csv'): array
+    {
+        // $exporter comes from the container, $format keeps its default
+    }
+}
+```
+
+Ein variadischer Parameter wird nie per Name gebunden. Ein Tippfehler im Schlüssel lässt das Array
+nicht mehr zur Signatur passen; es wird dann als Ganzes übergeben, was meist in einem `TypeError` endet.
+
 #### Erstellung mit Webhook-Callback
 
 ```php

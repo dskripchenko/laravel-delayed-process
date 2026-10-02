@@ -56,8 +56,7 @@ final class DelayedProcessRunner implements ProcessRunnerInterface
 
         try {
             $callable = $this->resolver->resolve($claimed->entity, $claimed->method);
-            $parameters = $this->normalizeParameters($claimed->parameters);
-            $result = $callable(...$parameters);
+            $result = $callable(...$this->bindArguments($callable, $claimed->parameters));
 
             $claimed->data = $this->normalizeResult($result);
             $claimed->status = ProcessStatus::Done;
@@ -126,17 +125,108 @@ final class DelayedProcessRunner implements ProcessRunnerInterface
         return mb_substr($text, 0, $max - mb_strlen($suffix)) . $suffix;
     }
 
-    private function normalizeParameters(?array $parameters): array
+    /**
+     * Turns the stored parameters into the arguments the handler is called with.
+     *
+     * - A list is passed positionally, as it always was.
+     * - A string-keyed array whose every key names a parameter of the handler
+     *   is passed by name: parameters it leaves out take their defaults, and a
+     *   required parameter typed with a class is resolved from the container.
+     *   An empty array is bound the same way, with nothing to pass by name.
+     * - Any other associative array (keys the handler does not declare, or a
+     *   mix of integer and string keys) is passed whole as the one argument,
+     *   which keeps handlers declared as `handle(array $params)` working.
+     *
+     * @return array<int|string, mixed>
+     */
+    private function bindArguments(callable $callable, ?array $parameters): array
     {
-        if ($parameters === null || $parameters === []) {
-            return [];
+        $parameters ??= [];
+
+        if ($parameters !== [] && array_is_list($parameters)) {
+            return $parameters;
         }
 
-        if (! array_is_list($parameters)) {
+        $signature = $this->reflect($callable)->getParameters();
+
+        if (! $this->namesParameters($parameters, $signature)) {
             return [$parameters];
         }
 
+        foreach ($signature as $parameter) {
+            $name = $parameter->getName();
+
+            if ($parameter->isVariadic() || array_key_exists($name, $parameters)) {
+                continue;
+            }
+
+            $dependency = $this->resolveDependency($parameter);
+
+            if ($dependency !== null) {
+                $parameters[$name] = $dependency;
+            }
+        }
+
         return $parameters;
+    }
+
+    /**
+     * @param  array<int|string, mixed>  $parameters
+     * @param  list<\ReflectionParameter>  $signature
+     */
+    private function namesParameters(array $parameters, array $signature): bool
+    {
+        $names = [];
+
+        foreach ($signature as $parameter) {
+            if (! $parameter->isVariadic()) {
+                $names[$parameter->getName()] = true;
+            }
+        }
+
+        foreach (array_keys($parameters) as $key) {
+            if (! is_string($key) || ! isset($names[$key])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * A required parameter typed with a class or interface, which the caller
+     * did not pass, comes from the container. Anything else is left to PHP:
+     * an optional parameter takes its default, and a missing required one
+     * fails the call with the usual ArgumentCountError.
+     */
+    private function resolveDependency(\ReflectionParameter $parameter): ?object
+    {
+        if ($parameter->isOptional()) {
+            return null;
+        }
+
+        $type = $parameter->getType();
+
+        if (! $type instanceof \ReflectionNamedType || $type->isBuiltin()) {
+            return null;
+        }
+
+        $class = $type->getName();
+
+        if ($class === 'self' || $class === 'static') {
+            $class = $parameter->getDeclaringClass()?->getName() ?? $class;
+        }
+
+        return app()->make($class);
+    }
+
+    private function reflect(callable $callable): \ReflectionFunctionAbstract
+    {
+        if (is_array($callable)) {
+            return new \ReflectionMethod($callable[0], $callable[1]);
+        }
+
+        return new \ReflectionFunction(\Closure::fromCallable($callable));
     }
 
     private function normalizeResult(mixed $result): array
