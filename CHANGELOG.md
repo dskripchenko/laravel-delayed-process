@@ -8,7 +8,7 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 Entries for releases published before this file existed were reconstructed from
 the tagged commit history.
 
-## [Unreleased]
+## [2.2.0] - 2026-10-02
 
 ### Fixed
 - A process created with named parameters, such as `make($entity, $method, ...['model' => $class])`,
