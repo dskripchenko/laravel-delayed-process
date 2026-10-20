@@ -56,8 +56,8 @@
 
 | 依赖项 | 版本 |
 |--------|------|
-| PHP | ^8.5 |
-| Laravel | ^12.0 |
+| PHP | ^8.2 |
+| Laravel | 11、12、13 |
 | 数据库 | PostgreSQL（推荐）或 MySQL/MariaDB |
 
 ---
@@ -88,6 +88,8 @@ php artisan migrate
     \App\Services\ExportService::class,
 ],
 ```
+
+**从 1.x 升级？** 数据表、白名单和部分 API 都已变化。请按步骤阅读 **[升级指南](upgrade.md)** —— 数据库命令的顺序很重要。
 
 ---
 
@@ -551,6 +553,8 @@ php artisan delayed:expire --dry-run
 php artisan delayed:migrate-v1
 php artisan delayed:migrate-v1 --force
 ```
+
+请在 `php artisan migrate` **之前**运行：顺序颠倒时，MySQL 上升级会失败，PostgreSQL 上升级会只完成一半。参见[升级指南](upgrade.md#第-4-步升级表)。
 
 ---
 

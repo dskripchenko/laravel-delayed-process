@@ -56,8 +56,8 @@
 
 | Зависимость | Версия |
 |-------------|--------|
-| PHP | ^8.5 |
-| Laravel | ^12.0 |
+| PHP | ^8.2 |
+| Laravel | 11, 12, 13 |
 | База данных | PostgreSQL (рекомендуется) или MySQL/MariaDB |
 
 ---
@@ -88,6 +88,8 @@ php artisan migrate
     \App\Services\ExportService::class,
 ],
 ```
+
+**Обновляетесь с 1.x?** Изменились таблица, белый список и часть API. Пройдите **[гайд по обновлению](upgrade.md)** по шагам — порядок команд для базы данных важен.
 
 ---
 
@@ -555,6 +557,8 @@ php artisan delayed:expire --dry-run
 php artisan delayed:migrate-v1
 php artisan delayed:migrate-v1 --force
 ```
+
+Запускайте её **до** `php artisan migrate`: в обратном порядке обновление падает на MySQL и остаётся недоделанным на PostgreSQL. См. [гайд по обновлению](upgrade.md#шаг-4-обновите-таблицу).
 
 ---
 

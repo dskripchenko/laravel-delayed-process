@@ -56,8 +56,8 @@ Asynchronous execution of long-running operations in Laravel with UUID-based tra
 
 | Dependency | Version |
 |------------|---------|
-| PHP | ^8.5 |
-| Laravel | ^12.0 |
+| PHP | ^8.2 |
+| Laravel | 11, 12, 13 |
 | Database | PostgreSQL (recommended) or MySQL/MariaDB |
 
 ---
@@ -88,6 +88,8 @@ Register allowed entities in `config/delayed-process.php`:
     \App\Services\ExportService::class,
 ],
 ```
+
+**Upgrading from 1.x?** The table, the allowlist and several APIs changed. Follow the **[Upgrade Guide](docs/en/upgrade.md)** step by step — the order of the database commands matters.
 
 ---
 
@@ -555,6 +557,8 @@ Upgrades the database schema from the legacy structure. Adds `error_message` / `
 php artisan delayed:migrate-v1
 php artisan delayed:migrate-v1 --force
 ```
+
+Run it **before** `php artisan migrate`: in the other order the upgrade fails on MySQL and stays half-done on PostgreSQL. See the [Upgrade Guide](docs/en/upgrade.md#step-4-upgrade-the-table).
 
 ---
 

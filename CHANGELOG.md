@@ -8,6 +8,17 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 Entries for releases published before this file existed were reconstructed from
 the tagged commit history.
 
+## [Unreleased]
+
+### Added
+- Upgrade guide (`docs/{en,ru,de,zh}/upgrade.md`): every change from 1.x to 2.x
+  that needs action, in the order to apply it, plus the changes between 2.x
+  minor versions. Linked from the installation section of the README.
+
+### Fixed
+- The README listed PHP ^8.5 and Laravel 12 as requirements; since 2.1.0 the
+  package supports PHP ^8.2 with Laravel 11, 12 and 13.
+
 ## [2.2.0] - 2026-10-02
 
 ### Fixed
@@ -55,7 +66,8 @@ the tagged commit history.
 
 ### Changed
 - The package was reworked end to end: new architecture, an event model around the
-  process lifecycle, a real test suite and full documentation.
+  process lifecycle, a real test suite and full documentation. Breaking for 1.x
+  users; see the [upgrade guide](docs/en/upgrade.md#1x--2x).
 
 ### Added
 - Frontend integration guide, also in the Russian and Chinese documentation.

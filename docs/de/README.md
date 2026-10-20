@@ -56,8 +56,8 @@ Asynchrone Ausführung langwieriger Operationen in Laravel mit UUID-basiertem Tr
 
 | Abhängigkeit | Version |
 |------------|---------|
-| PHP | ^8.5 |
-| Laravel | ^12.0 |
+| PHP | ^8.2 |
+| Laravel | 11, 12, 13 |
 | Datenbank | PostgreSQL (empfohlen) oder MySQL/MariaDB |
 
 ---
@@ -88,6 +88,8 @@ Registrieren Sie zugelassene Entities in `config/delayed-process.php`:
     \App\Services\ExportService::class,
 ],
 ```
+
+**Upgrade von 1.x?** Tabelle, Allowlist und mehrere APIs haben sich geändert. Folgen Sie dem **[Upgrade-Leitfaden](upgrade.md)** Schritt für Schritt — die Reihenfolge der Datenbankbefehle ist entscheidend.
 
 ---
 
@@ -556,6 +558,8 @@ Aktualisiert das Datenbankschema aus der Legacy-Struktur. Fügt `error_message` 
 php artisan delayed:migrate-v1
 php artisan delayed:migrate-v1 --force
 ```
+
+Führen Sie ihn **vor** `php artisan migrate` aus: in umgekehrter Reihenfolge schlägt das Upgrade unter MySQL fehl und bleibt unter PostgreSQL unvollständig. Siehe den [Upgrade-Leitfaden](upgrade.md#schritt-4-tabelle-aktualisieren).
 
 ---
 
