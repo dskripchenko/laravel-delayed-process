@@ -9,6 +9,7 @@ use Dskripchenko\DelayedProcess\Events\ProcessCreated;
 use Dskripchenko\DelayedProcess\Exceptions\InvalidParametersException;
 use Dskripchenko\DelayedProcess\Jobs\DelayedProcessJob;
 use Dskripchenko\DelayedProcess\Models\DelayedProcess;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\DB;
 
 final class DelayedProcessFactory implements ProcessFactoryInterface
@@ -54,7 +55,7 @@ final class DelayedProcessFactory implements ProcessFactoryInterface
 
             $process->save();
 
-            $job = new DelayedProcessJob($process);
+            $job = $this->makeJob($process);
             $this->configureJob($job, $entity);
 
             dispatch($job);
@@ -72,7 +73,24 @@ final class DelayedProcessFactory implements ProcessFactoryInterface
         }
     }
 
-    private function configureJob(DelayedProcessJob $job, string $entity): void
+    /**
+     * The job that runs the process: DelayedProcessJob, or the class set in
+     * `delayed-process.job.class` — for an application that carries its own
+     * request context (the client's IP, a session) into the worker. The class
+     * takes the process as its only constructor argument and uses Queueable.
+     */
+    private function makeJob(DelayedProcess $process): ShouldQueue
+    {
+        $class = (string) config('delayed-process.job.class', DelayedProcessJob::class);
+
+        if (! is_subclass_of($class, ShouldQueue::class)) {
+            throw new \InvalidArgumentException("delayed-process.job.class must implement ShouldQueue, {$class} given");
+        }
+
+        return new $class($process);
+    }
+
+    private function configureJob(ShouldQueue $job, string $entity): void
     {
         $entityConfig = $this->entityConfigResolver->getEntityConfig($entity);
 
@@ -84,7 +102,7 @@ final class DelayedProcessFactory implements ProcessFactoryInterface
             $job->onConnection($entityConfig['connection']);
         }
 
-        if (isset($entityConfig['timeout'])) {
+        if (isset($entityConfig['timeout']) && property_exists($job, 'timeout')) {
             $job->timeout = (int) $entityConfig['timeout'];
         }
     }

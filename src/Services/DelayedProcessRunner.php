@@ -12,6 +12,9 @@ use Dskripchenko\DelayedProcess\Events\ProcessCompleted;
 use Dskripchenko\DelayedProcess\Events\ProcessFailed;
 use Dskripchenko\DelayedProcess\Events\ProcessStarted;
 use Dskripchenko\DelayedProcess\Models\DelayedProcess;
+use Dskripchenko\DelayedProcess\Support\LooseInvoker;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 final class DelayedProcessRunner implements ProcessRunnerInterface
 {
@@ -56,7 +59,8 @@ final class DelayedProcessRunner implements ProcessRunnerInterface
 
         try {
             $callable = $this->resolver->resolve($claimed->entity, $claimed->method);
-            $result = $callable(...$this->bindArguments($callable, $claimed->parameters));
+            // From a non-strict file: scalar arguments are coerced as in 1.x (see LooseInvoker).
+            $result = LooseInvoker::invoke($callable, $this->bindArguments($callable, $claimed->parameters));
 
             $claimed->data = $this->normalizeResult($result);
             $claimed->status = ProcessStatus::Done;
@@ -229,8 +233,23 @@ final class DelayedProcessRunner implements ProcessRunnerInterface
         return new \ReflectionFunction(\Closure::fromCallable($callable));
     }
 
+    /**
+     * The handler's result as the array stored in `data`.
+     *
+     * An API resource, an Arrayable or a JsonSerializable object is unwrapped
+     * into its array first: 1.x stored a JsonResource as the object it renders,
+     * and wrapping it into a list (`[{...}]`) broke the clients reading `data`.
+     */
     private function normalizeResult(mixed $result): array
     {
+        if ($result instanceof JsonResource) {
+            $result = $result->resolve();
+        } elseif ($result instanceof Arrayable) {
+            $result = $result->toArray();
+        } elseif ($result instanceof \JsonSerializable) {
+            $result = $result->jsonSerialize();
+        }
+
         if ($result === null) {
             return [];
         }

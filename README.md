@@ -723,6 +723,7 @@ File: `config/delayed-process.php`
 | `callback.enabled` | `bool` | `false` | Enable webhook POST on terminal status |
 | `callback.timeout` | `int` | `10` | Webhook HTTP timeout in seconds |
 | `default_ttl_minutes` | `int\|null` | `null` | Default TTL for new processes (`null` = no expiration) |
+| `job.class` | `string` | `DelayedProcessJob::class` | Job class the factory dispatches (takes the process as its only argument) |
 | `job.timeout` | `int` | `300` | Queue job timeout in seconds |
 | `job.tries` | `int` | `1` | Queue job retry attempts (separate from process attempts) |
 | `job.backoff` | `array` | `[30, 60, 120]` | Queue job backoff delays in seconds |

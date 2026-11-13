@@ -73,6 +73,10 @@ return [
     |--------------------------------------------------------------------------
     */
     'job' => [
+        // The job class that runs a process. Replace it to carry your own
+        // request context into the worker; it takes the process as its only
+        // constructor argument (see DelayedProcessFactory::makeJob()).
+        'class' => \Dskripchenko\DelayedProcess\Jobs\DelayedProcessJob::class,
         'timeout' => 300,
         'tries' => 1,
         'backoff' => [30, 60, 120],

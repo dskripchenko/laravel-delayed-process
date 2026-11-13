@@ -7,9 +7,31 @@ was zu tun ist, die neueste Version zuerst. Bei einem Upgrade über mehrere
 Versionen hinweg werden alle dazwischenliegenden Abschnitte von unten nach oben
 angewendet.
 
+- [2.2 → 2.3](#22--23)
 - [2.1 → 2.2](#21--22)
 - [2.0 → 2.1](#20--21)
 - [1.x → 2.x](#1x--2x)
+
+---
+
+## 2.2 → 2.3
+
+Keine Schemaänderungen. Code, der auf 2.2 läuft, bleibt unverändert.
+
+**Handler werden im nicht-strikten Typmodus aufgerufen.** Der Runner ist eine
+Datei mit `strict_types`, daher scheiterte ein Handler `build(int $id)` mit dem
+String `"42"` an einem `TypeError`. Der Aufruf erfolgt jetzt aus einer Datei
+ohne `strict_types`: skalare Argumente werden wie in 1.x umgewandelt.
+
+**API-Ressourcen werden als Array gespeichert.** Ein Handler, der eine
+`JsonResource`, ein `Arrayable` oder ein `JsonSerializable` zurückgibt,
+speichert jetzt dessen Array (`{"paymentLink": "…"}`) statt einer Liste
+(`[{"paymentLink": "…"}]`).
+
+**Eigene Job-Klasse.** `delayed-process.job.class` legt den Job fest, den die
+Factory einreiht; der Konstruktor erhält den Prozess als einziges Argument.
+
+**`delayed:migrate-v1` wurde neu geschrieben** — siehe Schritt 4 von «1.x → 2.x».
 
 ---
 
@@ -131,6 +153,8 @@ Weitere Einstellungen (Versuche, Bereinigungsalter, Stuck-Timeout,
 Job-Timeout usw.) sind in der [Konfigurationsreferenz](README.md#konfigurationsreferenz) beschrieben.
 
 ### Schritt 4. Tabelle aktualisieren
+
+> **Ab 2.3:** `delayed:migrate-v1 --timezone=…` liest die naiven 1.x-Zeitstempel in der angegebenen Zone (Standard `app.timezone`) statt in UTC, konvertiert die Spalten mit einem einzigen `ALTER TABLE`, behält ungültiges JSON als JSON-String, ist pro Schritt idempotent und erlaubt `expired`/`cancelled` bereits im CHECK. Für Deployments, die nur `migrate` ausführen: `app(\Dskripchenko\DelayedProcess\Schema\V1SchemaUpgrader::class)->upgrade(config('app.timezone'))` in einer Migration vor `2026_03_11_000001`. Die Hinweise unten zu UTC und ungültigem JSON gelten nur für 2.0–2.2.
 
 **Die Reihenfolge ist wichtig: `delayed:migrate-v1` vor `migrate` ausführen.**
 

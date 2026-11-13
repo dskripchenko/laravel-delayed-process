@@ -5,9 +5,29 @@
 每一节列出两个版本之间的变化以及需要采取的操作，按从新到旧排列。
 跨越多个版本升级时，需要从下往上依次应用其间的每一节。
 
+- [2.2 → 2.3](#22--23)
 - [2.1 → 2.2](#21--22)
 - [2.0 → 2.1](#20--21)
 - [1.x → 2.x](#1x--2x)
+
+---
+
+## 2.2 → 2.3
+
+数据库结构不变。在 2.2 上运行的代码无需修改。
+
+**处理器以非严格类型模式调用。** Runner 文件启用了 `strict_types`，因此处理器
+`build(int $id)` 收到字符串 `"42"` 时会抛出 `TypeError`。现在调用发生在未启用
+`strict_types` 的文件中：标量参数会像 1.x 一样被转换。
+
+**API 资源按其数组保存。** 返回 `JsonResource`、`Arrayable` 或 `JsonSerializable`
+的处理器现在保存其数组（`{"paymentLink": "…"}`），而不是包在列表中
+（`[{"paymentLink": "…"}]`）。
+
+**自定义任务类。** `delayed-process.job.class` 指定工厂分发的任务类；其构造函数
+只接收进程一个参数。
+
+**`delayed:migrate-v1` 已重写** —— 见「1.x → 2.x」第 4 步。
 
 ---
 
@@ -112,6 +132,8 @@ SELECT DISTINCT entity, method FROM delayed_processes;
 其他设置（尝试次数、清理期限、卡住超时、任务超时等）见[配置参考](README.md#配置参考)。
 
 ### 第 4 步：升级表
+
+> **自 2.3 起：** `delayed:migrate-v1 --timezone=…` 按指定时区（默认 `app.timezone`）而非 UTC 读取 1.x 的无时区时间戳，用一条 `ALTER TABLE` 转换各列，将无效 JSON 保存为 JSON 字符串，每一步都可重复执行，CHECK 约束已允许 `expired`/`cancelled`。仅运行 `migrate` 的部署可在早于 `2026_03_11_000001` 的迁移中调用 `app(\Dskripchenko\DelayedProcess\Schema\V1SchemaUpgrader::class)->upgrade(config('app.timezone'))`。下文关于 UTC 和无效 JSON 的说明仅适用于 2.0–2.2。
 
 **顺序很重要：先运行 `delayed:migrate-v1`，再运行 `migrate`。**
 

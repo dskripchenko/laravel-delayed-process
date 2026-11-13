@@ -724,6 +724,7 @@ Datei: `config/delayed-process.php`
 | `callback.enabled` | `bool` | `false` | Webhook POST bei Endzustand aktivieren |
 | `callback.timeout` | `int` | `10` | Webhook HTTP Timeout in Sekunden |
 | `default_ttl_minutes` | `int\|null` | `null` | Standard-TTL für neue Prozesse (`null` = keine Ablauf) |
+| `job.class` | `string` | `DelayedProcessJob::class` | Job-Klasse, die die Factory einreiht (erhält den Prozess als einziges Argument) |
 | `job.timeout` | `int` | `300` | Queue-Job Timeout in Sekunden |
 | `job.tries` | `int` | `1` | Queue-Job Wiederholungsversuche (unabhängig von Prozess-Versuchen) |
 | `job.backoff` | `array` | `[30, 60, 120]` | Queue-Job Backoff-Verzögerungen in Sekunden |
