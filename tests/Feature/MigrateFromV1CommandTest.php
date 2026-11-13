@@ -16,7 +16,7 @@ it('fails when delayed_processes table does not exist', function (): void {
 it('reports already migrated when error_message column exists', function (): void {
     // The default migration creates a v2 schema with error_message
     $this->artisan('delayed:migrate-v1')
-        ->expectsOutput('Already migrated: column "error_message" exists.')
+        ->expectsOutput('Already migrated: the table has the 2.x schema.')
         ->assertSuccessful();
 });
 

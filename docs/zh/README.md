@@ -719,6 +719,7 @@ try {
 | `callback.enabled` | `bool` | `false` | 在终端状态下启用 Webhook POST |
 | `callback.timeout` | `int` | `10` | Webhook HTTP 超时（秒） |
 | `default_ttl_minutes` | `int\|null` | `null` | 新过程的默认 TTL（`null` = 无过期） |
+| `job.class` | `string` | `DelayedProcessJob::class` | 工厂分发的任务类（构造函数仅接收进程） |
 | `job.timeout` | `int` | `300` | 队列任务超时（秒） |
 | `job.tries` | `int` | `1` | 队列任务重试次数（不同于过程尝试） |
 | `job.backoff` | `array` | `[30, 60, 120]` | 队列任务退避延迟（秒） |

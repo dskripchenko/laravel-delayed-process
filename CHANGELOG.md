@@ -10,12 +10,42 @@ the tagged commit history.
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-11-13
+
+Makes the 1.x → 2.x upgrade possible for applications that relied on 1.x
+behaviour, and lets a deployment that only runs `migrate` do it.
+
 ### Added
+- `Schema\V1SchemaUpgrader`: the logic of `delayed:migrate-v1` as a class an
+  application migration can call (`app(V1SchemaUpgrader::class)->upgrade(config('app.timezone'))`).
+- `delayed:migrate-v1 --timezone=…`: the zone the 1.x timestamps were written in;
+  defaults to `app.timezone`.
+- `delayed-process.job.class`: the job class the factory dispatches, for an
+  application that carries its own request context into the worker. It takes the
+  process as its only constructor argument.
 - Upgrade guide (`docs/{en,ru,de,zh}/upgrade.md`): every change from 1.x to 2.x
   that needs action, in the order to apply it, plus the changes between 2.x
   minor versions. Linked from the installation section of the README.
 
 ### Fixed
+- Handlers are called from a non-strict file (`Support\LooseInvoker`): a handler
+  `build(int $id)` given the string `"42"` — what a JSON body or a form usually
+  carries — failed with a `TypeError`, because the runner is a strict file. 1.x
+  coerced the value. Correctly typed arguments pass exactly as before.
+- A handler returning an API resource, an `Arrayable` or a `JsonSerializable`
+  stored it wrapped in a list (`[{...}]`); it is now stored as its array, as 1.x did.
+- `delayed:migrate-v1`:
+  - read the naive 1.x timestamps as UTC (`AT TIME ZONE 'UTC'`), shifting them by
+    the application's offset; they are now read in `--timezone`;
+  - rewrote the table five times on PostgreSQL; the column conversion is now one
+    `ALTER TABLE`, with `lock_timeout`;
+  - failed on the first value that was not valid JSON; such a value is kept as a
+    JSON string (an empty one becomes `[]`);
+  - said «Already migrated» as soon as `error_message` existed, even when the
+    columns were still text; every step now checks the schema and the command is
+    safe to run again after a partial failure;
+  - added a CHECK constraint that the 2.1 migration had to replace; it now allows
+    `expired` and `cancelled` from the start.
 - The README listed PHP ^8.5 and Laravel 12 as requirements; since 2.1.0 the
   package supports PHP ^8.2 with Laravel 11, 12 and 13.
 

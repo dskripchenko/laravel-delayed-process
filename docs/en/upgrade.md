@@ -6,9 +6,33 @@ Each section lists what changed between two versions and what to do about it,
 newest first. Upgrading across several versions means applying every section
 in between, from the bottom up.
 
+- [2.2 → 2.3](#22--23)
 - [2.1 → 2.2](#21--22)
 - [2.0 → 2.1](#20--21)
 - [1.x → 2.x](#1x--2x)
+
+---
+
+## 2.2 → 2.3
+
+No schema changes. Nothing to change in code that already runs on 2.2.
+
+**Handlers are called in PHP's coercive mode.** The runner is a strict file,
+so a handler `build(int $id)` given the string `"42"` failed with a
+`TypeError`. The call is now made from a non-strict file: scalar arguments are
+coerced, as in 1.x. Correctly typed arguments pass as before.
+
+**API resources are stored as their array.** A handler returning a
+`JsonResource`, an `Arrayable` or a `JsonSerializable` now stores what it
+renders (`{"paymentLink": "…"}`), not that object wrapped in a list
+(`[{"paymentLink": "…"}]`). If a client of 2.0–2.2 unwrapped `data[0]` for
+such handlers, it reads `data` directly now.
+
+**Your own job class.** `delayed-process.job.class` sets the job the factory
+dispatches — for an application that carries its own request context into the
+worker. It takes the process as its only constructor argument.
+
+**`delayed:migrate-v1` is rewritten** — see Step 4 of «1.x → 2.x».
 
 ---
 
@@ -125,51 +149,56 @@ are described in the [configuration reference](../../README.md#configuration-ref
 
 ### Step 4. Upgrade the table
 
-**Order matters: run `delayed:migrate-v1` before `migrate`.**
+**Order matters: the 1.x → 2.0 step runs before the package migration.**
 
 ```bash
-php artisan delayed:migrate-v1 --force
+php artisan delayed:migrate-v1 --force --timezone=Europe/Moscow
 php artisan migrate --force
 ```
 
-`delayed:migrate-v1` brings the 1.x table to the 2.0 schema:
+If the deployment only runs `migrate`, call the same logic from an application
+migration dated before `2026_03_11_000001` (for example `2026_03_10_000000_…`):
+
+```php
+use Dskripchenko\DelayedProcess\Schema\V1SchemaUpgrader;
+
+public function up(): void
+{
+    app(V1SchemaUpgrader::class)->upgrade(config('app.timezone'));
+}
+```
+
+The upgrader brings the 1.x table to the 2.0 schema; every step checks the
+current schema first, so it does nothing on a 2.x table and can be run again
+after a partial failure:
 
 - adds `error_message` and `error_trace`;
-- adds a CHECK constraint on `status` (PostgreSQL, MySQL 8.0.16+, MariaDB);
+- adds a CHECK constraint on `status` that already allows `expired` and
+  `cancelled` (PostgreSQL, MySQL 8.0.16+, MariaDB);
 - PostgreSQL: converts `parameters`, `data`, `logs` to `jsonb` and
-  `created_at`, `updated_at` to `timestamptz`, creates partial indexes;
-- MySQL/MariaDB: converts the three columns to `json`, creates composite indexes;
+  `created_at`, `updated_at` to `timestamptz` in one `ALTER TABLE` (one table
+  rewrite, `lock_timeout` 10 s), creates the missing partial indexes;
+- MySQL/MariaDB: converts the three columns to `json` in one `ALTER TABLE`,
+  creates the missing composite indexes;
 - SQLite: adds the two columns only.
 
 `migrate` then runs the package migration
 `2026_03_11_000001_add_extended_columns_to_delayed_processes_table`, which
-adds `started_at`, `duration_ms`, `callback_url`, `progress`, `expires_at` and
-widens the CHECK constraint to `expired` and `cancelled`.
+adds `started_at`, `duration_ms`, `callback_url`, `progress`, `expires_at`.
 
-In the reverse order the upgrade breaks:
+What the upgrader takes care of, and what to check before production:
 
-- **MySQL/MariaDB:** the migration places its columns after `error_trace`,
-  which does not exist yet, and fails with "Unknown column".
-- **PostgreSQL:** the migration succeeds, then `delayed:migrate-v1` adds the
-  two columns and fails on the CHECK constraint the migration already created.
-  Run again, it reports "Already migrated" because `error_message` now exists,
-  and the `jsonb` conversion and the indexes are never applied.
-
-If the deployment runs `migrate` on its own, run `delayed:migrate-v1`
-before that step.
-
-Check before running it on production data:
-
-- **Time zone (PostgreSQL).** Timestamps are converted as UTC
-  (`AT TIME ZONE 'UTC'`). If the application stored local time in
-  `created_at`/`updated_at`, the converted values shift by the offset.
-- **Invalid JSON.** The conversion fails on a row whose `parameters`,
-  `data` or `logs` is not valid JSON. 1.x always wrote JSON there, but rows
-  edited by hand are worth checking first.
-- **Statuses.** The CHECK constraint accepts `new`, `wait`, `done`, `error`.
-  Rows with any other status must be fixed before the upgrade.
-- **Backup.** On MySQL the schema changes are not transactional: a failure
-  halfway leaves the table partly upgraded. Back up the table first.
+- **Time zone (PostgreSQL).** 1.x wrote naive timestamps in the application's
+  zone. They are read in `--timezone` (default `app.timezone`) — pass the zone
+  the application used, or the values shift by its offset.
+- **Invalid JSON.** A value that is not valid JSON is kept as a JSON string,
+  an empty one becomes `[]`; nothing fails and no row is lost.
+- **Statuses.** The CHECK constraint accepts `new`, `wait`, `done`, `error`,
+  `expired`, `cancelled`. Rows with any other status must be fixed first.
+- **Locks.** The column conversion rewrites the table once. On a large table
+  run it in a quiet window; it gives up after 10 s of waiting for a lock.
+- **Backup.** On MySQL the schema changes are not transactional: back up the
+  table first.
 
 The 1.x create migration and the 2.x one have the same name, so Laravel
 considers it already run and does not create the table again.

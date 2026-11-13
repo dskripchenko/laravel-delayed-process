@@ -723,6 +723,7 @@ try {
 | `callback.enabled` | `bool` | `false` | Включить webhook POST при терминальном статусе |
 | `callback.timeout` | `int` | `10` | Webhook HTTP timeout в секундах |
 | `default_ttl_minutes` | `int\|null` | `null` | TTL по умолчанию для новых процессов (`null` = без истечения) |
+| `job.class` | `string` | `DelayedProcessJob::class` | Класс джобы, которую ставит фабрика (принимает процесс единственным аргументом) |
 | `job.timeout` | `int` | `300` | Queue job timeout в секундах |
 | `job.tries` | `int` | `1` | Попытки повтора queue job (отдельно от попыток процесса) |
 | `job.backoff` | `array` | `[30, 60, 120]` | Queue job backoff задержки в секундах |
